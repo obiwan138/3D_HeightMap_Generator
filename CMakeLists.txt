@@ -1,6 +1,6 @@
 # CMake entry point
 cmake_minimum_required (VERSION 3.0)
-project (Tutorials)
+project (ECE4122-FP)
 
 find_package(OpenGL REQUIRED)
 
@@ -55,6 +55,7 @@ add_definitions(
 # Tutorial 9
 add_executable(main
 	src/main.cpp
+	src/chunkManager.cpp
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp
