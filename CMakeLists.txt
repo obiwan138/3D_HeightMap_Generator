@@ -56,7 +56,6 @@ add_definitions(
 add_executable(main
 	src/main.cpp
 	src/chunkManager.cpp
-	src/chunkManager.hpp
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp
