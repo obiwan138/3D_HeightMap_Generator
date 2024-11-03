@@ -3,20 +3,6 @@
 #include <cmath>
 #include <iostream>
 
-void perlin1DFull(std::vector<double> &surface, std::vector<double> &t, std::vector<double> gradient, int resolution) {
-    double n0, n1, u, i, p, fade;
-    size_t g0, g1;
-    for (size_t idx = 0; idx < surface.size(); idx++) {
-        p = idx / resolution + (idx % (size_t) resolution) / (double) resolution;
-        t[idx] = p;
-        u = p - floor(p);
-        n0 = gradient[floor(p)] * u;
-        n1 = gradient[ceil(p)] * (u-1);
-        fade = easeCurve<double>(u);
-        surface[idx] = n0 + fade * (n1-n0);
-    }
-}
-
 double gradient1D(int64_t seed, int x) {
     std::srand(static_cast<uint64_t>(seed) ^ static_cast<uint64_t>(x));
     uint64_t perm = std::rand();
@@ -32,10 +18,11 @@ double gradient1D(int64_t seed, int x) {
 
 
 glm::vec2 gradient2D(int64_t seed, int x, int y) {
-    std::srand(static_cast<uint64_t>(seed) ^ static_cast<uint64_t>(x));
-    std::srand(static_cast<uint64_t>(std::rand()) ^ static_cast<uint64_t>(y));
-    uint64_t perm = std::rand() % 8;
-    return glm::vec2(cos(M_PI/8 * perm), sin(M_PI/8 * perm));
+    std::srand(static_cast<uint64_t>(seed) ^ static_cast<uint64_t>(y));
+    std::srand(static_cast<uint64_t>(std::rand()) ^ static_cast<uint64_t>(x));
+    int N = 4;
+    uint64_t perm = std::rand() % N;
+    return glm::vec2(cos(M_PI/N * perm), sin(M_PI/N * perm));
 }
 
 double perlin1D(double x, int64_t seed) {
@@ -45,6 +32,18 @@ double perlin1D(double x, int64_t seed) {
     double n1 = gradient1D(seed, ceil(p)) * (u-1);
     double fade = easeCurve<double>(u);
     return n0 + fade * (n1-n0);
+}
+
+double fractalPerlin1D(double x, int64_t seed, int octaves, double freqStart, double freqRate, double ampRate) {
+    double y = 0;
+    double freq = freqStart;
+    double amplitude = 1;
+    for (int k = 0; k < octaves; k++) {
+        y += amplitude * perlin1D(x*freq, seed);
+        amplitude *= ampRate;
+        freq *= freqRate;
+    }
+    return y;
 }
 
 double perlin2D(double x, double y, int64_t seed) {
@@ -57,4 +56,16 @@ double perlin2D(double x, double y, int64_t seed) {
     double nx0 = n00 * (1 - easeCurve<double>(u)) + n10 * easeCurve<double>(u);
     double nx1 = n01 * (1 - easeCurve<double>(u)) + n11 * easeCurve<double>(u);
     return nx0 * (1 - easeCurve<double>(v)) + nx1 * easeCurve<double>(v);
+}
+
+double fractalPerlin2D(double x, double y, int64_t seed, int octaves, double freqStart, double freqRate, double ampRate) {
+    double height = 0;
+    double freq = freqStart;
+    double amplitude = 1;
+    for (int k = 0; k < octaves; k++) {
+        height += amplitude * perlin2D(x*freq, y*freq, seed);
+        amplitude *= ampRate;
+        freq *= freqRate;
+    }
+    return height;
 }

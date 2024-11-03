@@ -14,21 +14,22 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 
 template <typename T>
 class Chunk {
+private:
+    T hm;
+    glm::vec3 pos;
+    size_t sz;
 public:
     Chunk() {}
-    Chunk(size_t sz, glm::vec3 pos) : size(sz), position(pos) {}
+    Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
     ~Chunk() {}
 
-    T* heightMap() { return &heightMap }
-    size_t size() { return &size }
-    glm::vec3 position() { return position; }
+    T* heightMap() { return &hm; }
+    size_t size() { return sz; }
+    glm::vec3 position() { return pos; }
 
-    void setHeightMap(T hm) { heightMap = hm; }
-    void setSize(size_t sz) { size = sz; }
-    void setPosition(glm::vec3 pos) { position = pos; }
+    void setHeightMap(T hm) { this->hm = hm; }
+    void setSize(size_t sz) { this->sz = sz; }
+    void setPosition(glm::vec3 pos) { this->pos = pos; }
 
-private:
-    T heightMap;
-    glm::vec3 position;
-    size_t size;
+
 };
