@@ -69,16 +69,3 @@ double fractalPerlin2D(double x, double y, int64_t seed, int octaves, double fre
     }
     return height;
 }
-
-/*
-void perlin2D(glm::vec3& pos, int64_t seed) {
-    double u = x - floor(x);
-    double v = y - floor(y);
-    double n00 = glm::dot(gradient2D(seed, floor(x), floor(y)), glm::vec2(u, v));
-    double n10 = glm::dot(gradient2D(seed, floor(x)+1, floor(y)), glm::vec2(u-1, v));
-    double n01 = glm::dot(gradient2D(seed, floor(x), floor(y)+1), glm::vec2(u, v-1));
-    double n11 = glm::dot(gradient2D(seed, floor(x)+1, floor(y)+1), glm::vec2(u-1, v-1));
-    double nx0 = n00 * (1 - easeCurve<double>(u)) + n10 * easeCurve<double>(u);
-    double nx1 = n01 * (1 - easeCurve<double>(u)) + n11 * easeCurve<double>(u);
-    return nx0 * (1 - easeCurve<double>(v)) + nx1 * easeCurve<double>(v);
-}*/
