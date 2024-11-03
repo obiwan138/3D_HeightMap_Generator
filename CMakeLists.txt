@@ -1,6 +1,6 @@
 # CMake entry point
 cmake_minimum_required (VERSION 3.0)
-project (Tutorials)
+project (FinalProject)
 
 find_package(OpenGL REQUIRED)
 
@@ -55,6 +55,10 @@ add_definitions(
 # Tutorial 9
 add_executable(main
 	src/main.cpp
+	src/ViewController.h 
+	src/ViewController.cpp
+	src/ColorMap.h
+	src/ColorMap.cpp
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp
