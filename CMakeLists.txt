@@ -17,6 +17,7 @@ endif()
 # Compile external dependencies 
 add_subdirectory (external)
 
+
 # On Visual 2005 and above, this module can set the debug working directory
 cmake_policy(SET CMP0026 OLD)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/rpavlik-cmake-modules-fe2273")
@@ -34,8 +35,8 @@ include_directories(
 	external/glew-1.13.0/include/
 	external/assimp-3.0.1270/include/
 	external/bullet-2.81-rev2613/src/
-	.
-	include/
+	./
+    include/
 )
 
 set(ALL_LIBS
@@ -52,10 +53,13 @@ add_definitions(
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
+file(GLOB SOURCES src/*.cpp)
+
 # Tutorial 9
 add_executable(main
-	src/main.cpp
-	src/chunkManager.cpp
+	#src/main.cpp
+	#src/chunkManager.cpp
+    ${SOURCES}
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp
@@ -93,3 +97,6 @@ elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
 
 endif (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
 
+if (BUILD_TEST)
+    add_subdirectory (test)
+endif (BUILD_TEST)
