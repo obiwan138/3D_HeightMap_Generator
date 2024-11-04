@@ -36,7 +36,8 @@ include_directories(
 	external/assimp-3.0.1270/include/
 	external/bullet-2.81-rev2613/src/
 	./
-    include/
+  include/
+  src/
 )
 
 set(ALL_LIBS
@@ -57,9 +58,14 @@ file(GLOB SOURCES src/*.cpp)
 
 # Tutorial 9
 add_executable(main
+	src/main.cpp
+	src/ViewController.h 
+	src/ViewController.cpp
+	src/ColorMap.h
+	src/ColorMap.cpp
 	#src/main.cpp
 	#src/chunkManager.cpp
-    ${SOURCES}
+  ${SOURCES}
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp
