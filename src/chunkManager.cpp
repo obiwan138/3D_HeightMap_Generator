@@ -55,17 +55,17 @@ void ChunkManager::update(glm::vec3 pos){
 		m_center.x -= m_chunkSize;
 	}
 
-	//need new chunks in the +y direction
-	if (m_pos.y > m_center.y + m_chunkSize / 2) {
+	//need new chunks in the +z direction
+	if (m_pos.z > m_center.z + m_chunkSize / 2) {
 
 
-		m_center.y += m_chunkSize;
+		m_center.z += m_chunkSize;
 	}
 
-	//need new chunks in the -y direction
-	if (m_pos.y < m_center.y + m_chunkSize / 2) {
+	//need new chunks in the -z direction
+	if (m_pos.z < m_center.z + m_chunkSize / 2) {
 
 
-		m_center.y -= m_chunkSize;
+		m_center.z -= m_chunkSize;
 	}
 }
