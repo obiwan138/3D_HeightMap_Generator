@@ -71,7 +71,8 @@ int main(int argc, char* argv[]) {
 
         // Send data to gnuplot
         gp << "set pm3d map\n";
-        gp << "set palette gray\n"; // Set a color palette
+        //gp << "set palette gray\n"; // Set a color palette
+        gp << "set palette rgbformulae 23,25,3\n";
         gp << "splot '-' matrix with image\n";
 
         for (const auto &row : data) {

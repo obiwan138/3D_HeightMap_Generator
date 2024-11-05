@@ -3,6 +3,7 @@
 #include <map>
 #include <ctime>
 #include <glm/glm.hpp>
+#include <random>
 
 template <typename T>
 T easeCurve(T t) { // f(t) = 6 * t^6 - 15 * t^5 + 10 * t^3 
@@ -14,9 +15,6 @@ public:
     GradientNoise();
     GradientNoise(int64_t seed);
     ~GradientNoise();
-
-    double gradient1D(int64_t seed, int x);
-    glm::vec2 gradient2D(int64_t seed, int x, int y);
 
     double perlin1D(double x);
     double perlin2D(double x, double y);
@@ -38,12 +36,18 @@ private:
     private:
         glm::vec2 generate();
         std::map<std::pair<int, int>, glm::vec2> _gradients;
+        std::random_device rd; 
+        std::mt19937 generator;
+        std::uniform_int_distribution<int> distribution;
     };
 
     class Gradient1 {
     public:
         Gradient1(int64_t seed);
         double at(int x);
+        std::random_device rd; 
+        std::mt19937 generator;
+        std::uniform_int_distribution<int> distribution;
     private:
         double generate();
         std::map<int, double> _gradients;
