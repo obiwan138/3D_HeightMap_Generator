@@ -34,6 +34,10 @@ using namespace glm;
 #include <common/objloader.hpp>
 #include <common/vboindexer.hpp>
 
+#include "chunkManager.hpp"
+#include "Chunk.hpp"
+#include <iostream>
+
 // This struct makes it easier to keep track of the texture and locations of many coppies of the same chess piece asset.
 struct Piece {
 	Piece(std::string t, std::vector<glm::vec3> p) {
@@ -48,6 +52,10 @@ struct Piece {
 // Main loop
 int main( void )
 {
+	ChunkManager manager(1, 123, 16.0);
+	//Chunk<std::vector<glm::vec3>> mychunk;
+	std::cout << "manager created" << std::endl;
+
 	// Initialize GLFW
 	if( !glfwInit() )
 	{
@@ -84,7 +92,7 @@ int main( void )
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     // Hide the mouse and enable unlimited movement
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // Set the mouse at the center of the screen
     glfwPollEvents();

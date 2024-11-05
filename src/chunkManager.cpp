@@ -12,35 +12,60 @@ This is the chunk management algorithm. It takes in user position, and current c
 
 #include <glm/glm.hpp>
 #include "Chunk.hpp"
+#include "chunkManager.hpp"
 
-void chunkManager(glm::vec3 userPosition, int16_t viewDist, int64_t seed, float chunkSize, 
-	std::map<glm::vec2, Chunk<std::vector<glm::vec3>>> &chunkMap) {
+#include <iostream>
 
-	//find center of loaded chunks
-	glm::vec2 chunkMapCenter;
-	for (auto i = chunkMap.begin(); i != chunkMap.end(); i++) {
+ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize) {
 
+	m_viewDist = viewDist;
+	m_seed = seed;
+	m_chunkSize = chunkSize;
+
+	m_pos = glm::vec3(0, 0, 0);
+	m_prevPos = m_pos;
+	m_center = m_pos;
+
+	for (int i = -m_viewDist; i <= m_viewDist; i++) {
+		for (int j = -m_viewDist; j <= m_viewDist; j++) {
+			chunkMap.emplace(std::pair<int, int>(i, j), Chunk(m_seed, m_chunkSize, glm::vec2(i, j)));
+		}
 	}
+}
+
+void ChunkManager::update(glm::vec3 pos){
+	m_prevPos = m_pos;
+	m_pos = pos;
+
+	glm::vec3 direction = m_pos - m_prevPos;
 
 	//need new chunks in the +x direction
-	if (userPosition.x > chunkMapCenter.x + chunkSize / 2) {
-		for (int i = 0; i < 1 + viewDist * 2; i++) {
+	if (m_pos.x > m_center.x + m_chunkSize / 2) {
+		//for (int i = 0; i < 1 + m_viewDist * 2; i++) {
 
-		}
+		//}
+
+		m_center.x += m_chunkSize;
 	}
 
 	//need new chunks in the -x direction
-	if (userPosition.x < chunkMapCenter.x - chunkSize / 2) {
+	if (m_pos.x < m_center.x - m_chunkSize / 2) {
 
+
+		m_center.x -= m_chunkSize;
 	}
 
 	//need new chunks in the +y direction
-	if (userPosition.y > chunkMapCenter.y + chunkSize / 2) {
+	if (m_pos.y > m_center.y + m_chunkSize / 2) {
 
+
+		m_center.y += m_chunkSize;
 	}
 
 	//need new chunks in the -y direction
-	if (userPosition.y < chunkMapCenter.y + chunkSize / 2) {
+	if (m_pos.y < m_center.y + m_chunkSize / 2) {
 
+
+		m_center.y -= m_chunkSize;
 	}
 }

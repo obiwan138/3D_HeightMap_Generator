@@ -13,5 +13,18 @@ header for chunkManager
 #include <glm/glm.hpp>
 #include "Chunk.hpp"
 
-void chunkManager(glm::vec3 userPosition, int16_t viewDist, int64_t seed, float chunkSize,
-	std::map<glm::vec2, Chunk<std::vector<glm::vec3>>>& chunkMap);
+class ChunkManager {
+private:
+    glm::vec3 m_pos;
+    glm::vec3 m_prevPos;
+    glm::vec3 m_center;
+    float m_chunkSize;
+    int16_t m_viewDist;
+    int64_t m_seed;
+public:
+    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize);
+
+    std::map<std::pair<int, int>, Chunk> chunkMap;
+
+    void update(glm::vec3 pos);
+};

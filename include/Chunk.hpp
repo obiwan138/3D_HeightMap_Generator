@@ -9,27 +9,30 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 
 #pragma once
 
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-template <typename T>
 class Chunk {
 private:
-    T hm;
-    glm::vec3 pos;
-    size_t sz;
+    std::vector<glm::vec3> heightMap;
+    double m_chunkSize;
+    int m_resolution; //num points per side
+    double m_spacing; //distance between points
+    glm::vec2 m_chunkCoords;
 public:
     Chunk() {}
-    Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
-    ~Chunk() {}
+    Chunk(int64_t seed, double chunkSize, glm::vec2 chunkCoords);
+    //Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
+    //~Chunk() {}
 
-    T* heightMap() { return &hm; }
-    size_t size() { return sz; }
-    glm::vec3 position() { return pos; }
+    //std::vector<glm::vec3>> heightMap() { return &heightMap; }
+    //size_t size() { return sz; }
+    //glm::vec3 position() { return pos; }
 
-    void setHeightMap(T hm) { this->hm = hm; }
-    void setSize(size_t sz) { this->sz = sz; }
-    void setPosition(glm::vec3 pos) { this->pos = pos; }
+    //void setHeightMap(T hm) { this->hm = hm; }
+    //void setSize(size_t sz) { this->sz = sz; }
+    //void setPosition(glm::vec3 pos) { this->pos = pos; }
 
 
 };
