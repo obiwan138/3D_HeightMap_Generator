@@ -44,13 +44,14 @@ int main(int argc, char* argv[]) {
 
     Gnuplot gp;
     size_t size = vm["size"].as<size_t>();
+    GradientNoise gn(vm["seed"].as<int64_t>());
 
     if (perlin1D) {
         std::vector<double> data(size, 0);
         std::vector<double> t(size, 0);
         for (int i = 0; i < size; i++) {
-            data[i] = fractalPerlin1D(i, vm["seed"].as<int64_t>(), vm["octaves"].as<int>(),
-                    vm["freq-start"].as<double>(), vm["freq-rate"].as<double>(), vm["amp-rate"].as<double>());
+            data[i] = gn.fractalPerlin1D(i, vm["octaves"].as<int>(), vm["freq-start"].as<double>(), 
+                    vm["freq-rate"].as<double>(), vm["amp-rate"].as<double>());
             t[i] = i;
         }
         
@@ -63,8 +64,8 @@ int main(int argc, char* argv[]) {
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                data[i][j] += fractalPerlin2D(i, j, vm["seed"].as<int64_t>(), vm["octaves"].as<int>(),
-                        vm["freq-start"].as<double>(), vm["freq-rate"].as<double>(), vm["amp-rate"].as<double>());
+                data[i][j] += gn.fractalPerlin2D(i, j, vm["octaves"].as<int>(), vm["freq-start"].as<double>(), 
+                        vm["freq-rate"].as<double>(), vm["amp-rate"].as<double>());
             }
         }
 
