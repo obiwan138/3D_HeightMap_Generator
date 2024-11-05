@@ -35,6 +35,8 @@ using namespace glm;
 #include <common/shader.hpp>
 #include "ViewController.h"
 #include "ColorMap.h"
+#include "Chunk.hpp"
+#include <unordered_map>
 
 void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount);
 // Main
@@ -47,6 +49,7 @@ int main( void )
 	 ********************************************************************/
 
 	// Initialize GLFW
+
 	if( !glfwInit() )
 	{
 		fprintf( stderr, "Failed to initialize GLFW\n" );
