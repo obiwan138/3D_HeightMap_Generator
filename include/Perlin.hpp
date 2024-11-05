@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <map>
 #include <ctime>
 #include <glm/glm.hpp>
 
@@ -8,20 +9,46 @@ T easeCurve(T t) { // f(t) = 6 * t^6 - 15 * t^5 + 10 * t^3
     return ((6 * t - 15) * t + 10) * t * t * t;
 }
 
-double gradient1D(int64_t seed, int x);
+class GradientNoise {
+public:
+    GradientNoise();
+    GradientNoise(int64_t seed);
+    ~GradientNoise();
 
-glm::vec2 gradient2D(int64_t seed, int x, int y);
+    double gradient1D(int64_t seed, int x);
+    glm::vec2 gradient2D(int64_t seed, int x, int y);
 
-double perlin1D(double x, int64_t seed);
+    double perlin1D(double x);
+    double perlin2D(double x, double y);
+    void perlin2D(glm::vec3& pos);
 
-double perlin2D(double x, double y, int64_t seed);
+    double fractalPerlin1D(double x, int octaves=8, double freqStart=0.05, 
+            double freqRate=0.5, double ampRate=0.5);
+    double fractalPerlin2D(double x, double y, int octaves=8, double freqStart=0.05, 
+            double freqRate=0.5, double ampRate=0.5);
+    void fractalPerlin2D(glm::vec3& pos, int octaves=8, double freqStart=0.05, 
+            double freqRate=0.5, double ampRate=0.5);
 
-void perlin2D(glm::vec3& pos, int64_t seed);
+private:
+    class Gradient2 {
+    public:
+        Gradient2(int64_t seed);
+        glm::vec2 at(glm::vec2);
+        glm::vec2 at(int x, int y);
+    private:
+        glm::vec2 generate();
+        std::map<std::pair<int, int>, glm::vec2> _gradients;
+    };
 
-double fractalPerlin1D(double x, int64_t seed, 
-        int octaves=8, double freqStart=0.05, double freqRate=0.5, double ampRate=0.5);
+    class Gradient1 {
+    public:
+        Gradient1(int64_t seed);
+        double at(int x);
+    private:
+        double generate();
+        std::map<int, double> _gradients;
+    };
 
-double fractalPerlin2D(double x, double y, int64_t seed, 
-        int octaves=8, double freqStart=0.05, double freqRate=0.5, double ampRate=0.5);
-
-void fractalPerlin2D(glm::vec3& pos, int64_t see, int octaves=8);
+    Gradient1 gradient1;
+    Gradient2 gradient2;
+};
