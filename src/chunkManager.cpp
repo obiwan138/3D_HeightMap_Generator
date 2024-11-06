@@ -16,7 +16,7 @@ This is the chunk management algorithm. It takes in user position, and current c
 
 #include <iostream>
 
-ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize) {
+ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize) : gradientNoise(seed) {
 
 	m_viewDist = viewDist;
 	m_seed = seed;
@@ -28,7 +28,20 @@ ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize) {
 
 	for (int i = -m_viewDist; i <= m_viewDist; i++) {
 		for (int j = -m_viewDist; j <= m_viewDist; j++) {
-			chunkMap.emplace(std::pair<int, int>(i, j), Chunk(m_seed, m_chunkSize, glm::vec2(i, j)));
+			std::pair<int, int> currentPair(i, j);
+
+			chunkMap.emplace(currentPair, Chunk(m_seed, m_chunkSize, glm::vec2(i, j)));
+
+			glm::vec3 offset = glm::vec3(i - m_chunkSize / 2, 0, j - m_chunkSize / 2);
+
+			for (int row = 0; row < chunkMap[currentPair].spacing(); row++) {
+				for (int col = 0; col < chunkMap[currentPair].resolution(); col++) {
+					chunkMap[currentPair].heightMap[row * chunkMap[currentPair].resolution() + col].x = offset.x + chunkMap[currentPair].spacing() * col;
+					chunkMap[currentPair].heightMap[row * chunkMap[currentPair].resolution() + col].z = offset.z + chunkMap[currentPair].spacing() * row;
+
+					
+				}
+			}
 		}
 	}
 }

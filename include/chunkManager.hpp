@@ -12,6 +12,7 @@ header for chunkManager
 
 #include <glm/glm.hpp>
 #include "Chunk.hpp"
+#include "Perlin.hpp"
 
 class ChunkManager {
 private:
@@ -21,6 +22,8 @@ private:
     float m_chunkSize;
     int16_t m_viewDist;
     int64_t m_seed;
+
+    GradientNoise gradientNoise;
 public:
     ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize);
 

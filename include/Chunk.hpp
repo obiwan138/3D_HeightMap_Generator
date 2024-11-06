@@ -15,7 +15,6 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 
 class Chunk {
 private:
-    std::vector<glm::vec3> heightMap;
     double m_chunkSize;
     int m_resolution; //num points per side
     double m_spacing; //distance between points
@@ -26,9 +25,12 @@ public:
     //Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
     //~Chunk() {}
 
-    //std::vector<glm::vec3>> heightMap() { return &heightMap; }
-    //size_t size() { return sz; }
-    //glm::vec3 position() { return pos; }
+    //make private?
+    std::vector<glm::vec3> heightMap;
+
+    double size() { return m_chunkSize; }
+    int resolution() { return m_resolution; }
+    double spacing() { return m_spacing; }
 
     //void setHeightMap(T hm) { this->hm = hm; }
     //void setSize(size_t sz) { this->sz = sz; }
