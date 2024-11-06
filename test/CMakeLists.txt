@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.0)
 project (ECE4122-FP)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams filesystem program_options)
+find_package(OpenMP REQUIRED)
 
 include_directories(
 	../external/glm-0.9.7.1/
@@ -28,4 +29,5 @@ add_executable(perlin-test
 
 target_link_libraries(perlin-test
     ${Boost_LIBRARIES}
+	OpenMP::OpenMP_CXX
 )
