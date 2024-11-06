@@ -20,12 +20,13 @@ private:
     glm::vec3 m_prevPos;
     glm::vec3 m_center;
     float m_chunkSize;
+    float m_resolution;
     int16_t m_viewDist;
     int64_t m_seed;
 
     GradientNoise gradientNoise;
 public:
-    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize);
+    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution);
 
     std::map<std::pair<int, int>, Chunk> chunkMap;
 
