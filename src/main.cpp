@@ -33,14 +33,29 @@ GLFWwindow* window;
 using namespace glm;
 
 #include <common/shader.hpp>
+#include <common/texture.hpp>
+#include <common/controls.hpp>
+#include <common/objloader.hpp>
+#include <common/vboindexer.hpp>
+
+#include "chunkManager.hpp"
 #include "ViewController.h"
 #include "ColorMap.h"
 #include "Chunk.hpp"
-#include <unordered_map>
+#include <iostream>
+
+// This struct makes it easier to keep track of the texture and locations of many coppies of the same chess piece asset.
+struct Piece {
+	Piece(std::string t, std::vector<glm::vec3> p) {
+		texturePath = t;
+		positions = p;
+	}
+	Piece()=default;
+	std::string texturePath; // Texture for this mesh
+	std::vector<glm::vec3> positions; // Locations of the coppies of this mesh
+};
 
 void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount);
-// Main
-//////////////////////////////////////////////////////////////////////////////////////
 
 int main( void )
 {
@@ -86,7 +101,7 @@ int main( void )
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     // Hide the mouse and enable unlimited movement
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // Set the mouse at the center of the screen
     glfwPollEvents();
@@ -138,7 +153,7 @@ int main( void )
 	// Bounds
 	float LENGTH_X = 50;
 	float LENGTH_Z = 50;
-	float resolution = 0.1f;
+	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
 	unsigned int SIZE_Z = static_cast<unsigned int>(LENGTH_Z / resolution);
@@ -151,29 +166,34 @@ int main( void )
 	float pi = 3.14159265359f;
 	float y_max = 0;
 	float y_min = 0;
-	std::vector<glm::vec3> vertices;
-	for (unsigned int i = 0; i < SIZE_Z; i++) 
-	{
-		for (unsigned int j = 0; j < SIZE_X; j++) 
-		{
-			// Create a grid centered at origin, scaled to be easily visible
-			float x = -1.f*LENGTH_X/2.f + i*resolution;
-			float z = -1.f*LENGTH_Z/2.f + j*resolution;
 
-			float y = sin(2*pi*x/10) * sin(2*pi*z/10);
+	ChunkManager manager(0, 123, LENGTH_X, resolution);
+	std::cout << "manager created" << std::endl;
 
-			vertices.push_back(glm::vec3(x,y,z));
+	std::vector<glm::vec3> vertices = manager.chunkMap[std::pair<int, int>(0, 0)].heightMap;
+	//std::vector<glm::vec3> vertices;
 
-			if (y > y_max) 
-			{
-				y_max = y;
-			}
-			if (y < y_min) 
-			{
-				y_min = y;
-			}
-		}
-	}
+	//for (unsigned int i = 0; i < SIZE_Z; i++) 
+	//{
+	//	for (unsigned int j = 0; j < SIZE_X; j++) 
+	//	{
+	//		// Create a grid centered at origin, scaled to be easily visible
+	//		float x = -1.f*LENGTH_X/2.f + i*resolution;
+	//		float z = -1.f*LENGTH_Z/2.f + j*resolution;
+	//		//float y = sin(2*pi*x/10) * sin(2*pi*z/10);
+	//		float y = 0.0f;
+	//		vertices.push_back(glm::vec3(x,y,z));
+	//		if (y > y_max) 
+	//		{
+	//			y_max = y;
+	//		}
+	//		if (y < y_min) 
+	//		{
+	//			y_min = y;
+	//		}
+	//		std::cout << i * SIZE_Z + j << ": " << x << ", " << y << ", " << z << std::endl;
+	//	}
+	//}
 
 	// Get the associated colors
 	std::vector<glm::vec3> colors = colorMap.getColorVector(vertices);	

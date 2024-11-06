@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include "Perlin.hpp"
 #include <stddef.h>
 #include <cmath>
