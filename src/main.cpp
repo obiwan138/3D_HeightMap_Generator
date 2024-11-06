@@ -151,9 +151,9 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 5;
-	float LENGTH_Z = 5;
-	float resolution = 1.0f;
+	float LENGTH_X = 50;
+	float LENGTH_Z = 50;
+	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
 	unsigned int SIZE_Z = static_cast<unsigned int>(LENGTH_Z / resolution);
