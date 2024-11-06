@@ -5,13 +5,13 @@
 #include <cmath>
 #include <iostream>
 
-GradientNoise::GradientNoise() : gradient1(std::time(NULL)), gradient2(std::time(NULL)) {}
+GradientNoise::GradientNoise() : _gradient1(std::time(NULL)), _gradient2(std::time(NULL)) {}
 
-GradientNoise::GradientNoise(int64_t seed) : gradient1(seed), gradient2(seed) {}
+GradientNoise::GradientNoise(int64_t seed) : _gradient1(seed), _gradient2(seed) {}
 
 GradientNoise::~GradientNoise() {}
 
-GradientNoise::Gradient2::Gradient2(int64_t seed) : rd(), generator(rd()), distribution(0,7) {
+GradientNoise::Gradient2::Gradient2(int64_t seed) {
     std::srand(static_cast<uint64_t>(seed));
 }
     
@@ -32,7 +32,7 @@ glm::vec2 GradientNoise::Gradient2::at(int x, int y) {
 }
 
 glm::vec2 GradientNoise::Gradient2::generate() {
-    int N = 4;
+    int N = 8;
     uint64_t perm = std::rand() % N;
     if (perm == 0)
         return glm::vec2(1, 0);
@@ -42,7 +42,14 @@ glm::vec2 GradientNoise::Gradient2::generate() {
         return glm::vec2(0, 1);
     else if (perm == 3)
         return glm::vec2(0, -1);
-    //return glm::vec2(cos(M_PI/N * perm), sin(M_PI/N * perm));
+    else if (perm == 4)
+        return glm::vec2(0.7071, 0.7071);
+    else if (perm == 5)
+        return glm::vec2(0.7071, -0.7071);
+    else if (perm == 6)
+        return glm::vec2(-0.7071, 0.7071);
+    else if (perm == 7)
+        return glm::vec2(-0.7071, -0.7071);
 }
 
 GradientNoise::Gradient1::Gradient1(int64_t seed) {
@@ -57,16 +64,25 @@ double GradientNoise::Gradient1::at(int x) {
 }
 
 double GradientNoise::Gradient1::generate() {
-    int N = 8;
+        int N = 5;
     uint64_t perm = std::rand() % N;
-    return cos(M_PI/N * perm);
+    if (perm == 0)
+        return 1;
+    else if (perm == 1)
+        return 0.5;
+    else if (perm == 2)
+        return 0;
+    else if (perm == 3)
+        return -0.5;
+    else if (perm == 4)
+        return -1;
 }
 
 double GradientNoise::perlin1D(double x) {
     double p = x;
     double u = p - floor(p);
-    double n0 = gradient1.at(floor(p)) * u;
-    double n1 = gradient1.at(ceil(p)) * (u-1);
+    double n0 = _gradient1.at(floor(p)) * u;
+    double n1 = _gradient1.at(ceil(p)) * (u-1);
     double fade = easeCurve<double>(u);
     return n0 + fade * (n1-n0);
 }
@@ -86,10 +102,10 @@ double GradientNoise::fractalPerlin1D(double x, int octaves, double freqStart, d
 double GradientNoise::perlin2D(double x, double y) {
     double u = x - floor(x);
     double v = y - floor(y);
-    double n00 = glm::dot(gradient2.at(floor(x), floor(y)), glm::vec2(u, v));
-    double n10 = glm::dot(gradient2.at(floor(x)+1, floor(y)), glm::vec2(u-1, v));
-    double n01 = glm::dot(gradient2.at(floor(x), floor(y)+1), glm::vec2(u, v-1));
-    double n11 = glm::dot(gradient2.at(floor(x)+1, floor(y)+1), glm::vec2(u-1, v-1));
+    double n00 = glm::dot(_gradient2.at(floor(x), floor(y)), glm::vec2(u, v));
+    double n10 = glm::dot(_gradient2.at(floor(x)+1, floor(y)), glm::vec2(u-1, v));
+    double n01 = glm::dot(_gradient2.at(floor(x), floor(y)+1), glm::vec2(u, v-1));
+    double n11 = glm::dot(_gradient2.at(floor(x)+1, floor(y)+1), glm::vec2(u-1, v-1));
     double nx0 = n00 * (1 - easeCurve<double>(u)) + n10 * easeCurve<double>(u);
     double nx1 = n01 * (1 - easeCurve<double>(u)) + n11 * easeCurve<double>(u);
     return nx0 * (1 - easeCurve<double>(v)) + nx1 * easeCurve<double>(v);
@@ -104,7 +120,7 @@ double GradientNoise::fractalPerlin2D(double x, double y, int octaves, double fr
         amplitude *= ampRate;
         freq *= freqRate;
     }
-    return height;
+    return sin(height);
 }
 
 void GradientNoise::fractalPerlin2D(glm::vec3& pos, int octaves, double freqStart, double freqRate, double ampRate) {

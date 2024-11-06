@@ -36,23 +36,17 @@ private:
     private:
         glm::vec2 generate();
         std::map<std::pair<int, int>, glm::vec2> _gradients;
-        std::random_device rd; 
-        std::mt19937 generator;
-        std::uniform_int_distribution<int> distribution;
     };
 
     class Gradient1 {
     public:
         Gradient1(int64_t seed);
         double at(int x);
-        std::random_device rd; 
-        std::mt19937 generator;
-        std::uniform_int_distribution<int> distribution;
     private:
         double generate();
         std::map<int, double> _gradients;
     };
 
-    Gradient1 gradient1;
-    Gradient2 gradient2;
+    Gradient1 _gradient1;
+    Gradient2 _gradient2;
 };

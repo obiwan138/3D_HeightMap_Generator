@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
     else {
         std::vector<std::vector<double>> data(size, std::vector<double>(size, 0));
 
+        #pragma omp parallel for collapse(2)
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 data[i][j] += gn.fractalPerlin2D(i, j, vm["octaves"].as<int>(), vm["freq-start"].as<double>(), 
@@ -72,7 +73,8 @@ int main(int argc, char* argv[]) {
         // Send data to gnuplot
         gp << "set pm3d map\n";
         //gp << "set palette gray\n"; // Set a color palette
-        gp << "set palette rgbformulae 23,25,3\n";
+        //gp << "set palette rgbformulae 23,25,3\n"; // hot
+        gp << "set palette rgbformulae 21,22,23\n";
         gp << "splot '-' matrix with image\n";
 
         for (const auto &row : data) {
