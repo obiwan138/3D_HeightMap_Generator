@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
             ("freq-start", po::value<double>()->default_value(0.05), "set starting frequency for fractal perlin noise")
             ("freq-rate", po::value<double>()->default_value(2), "set frequency rate for fractal perlin noise")
             ("amp-rate", po::value<double>()->default_value(0.5), "set amplitude decay rate for fractal perlin noise")
+            ("mode, m", po::value<int>()->default_value(0), "Noise mode (0 - fractal, 1 - turbulent, 2, - opalescent)")
         ;
               
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -65,7 +66,7 @@ int main(int argc, char* argv[]) {
         #pragma omp parallel for collapse(2)
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                data[i][j] += gn.fractalPerlin2D(i, j, vm["octaves"].as<int>(), vm["freq-start"].as<double>(), 
+                data[i][j] = gn.fractalPerlin2D(i, j, 10, vm["mode"].as<int>(), vm["octaves"].as<int>(), vm["freq-start"].as<double>(), 
                         vm["freq-rate"].as<double>(), vm["amp-rate"].as<double>());
             }
         }

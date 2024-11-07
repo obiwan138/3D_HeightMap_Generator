@@ -40,7 +40,7 @@ ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, flo
 					chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].z = offset.z + chunkMap[currentPair].resolution() * col;
 					chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].x = offset.x + chunkMap[currentPair].resolution() * row;
 					//chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].y = 1;
-					gradientNoise.fractalPerlin2D(chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col]);
+					gradientNoise.fractalPerlin2D(chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col], 5, 0);
 
 					//std::cout << row * chunkMap[currentPair].pointsPerSide() + col << ": " << chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].x << ", " << chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].y
 					//	<< ", " << chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].z << std::endl;
