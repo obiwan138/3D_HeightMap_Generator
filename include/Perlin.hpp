@@ -26,11 +26,11 @@ public:
     glm::vec3 perlin2D(glm::vec3& pos);
 
     double fractalPerlin1D(double x, int octaves=8, double freqStart=0.05, 
-            double freqRate=0.5, double ampRate=0.5);
+            double freqRate=2, double ampRate=0.5);
     double fractalPerlin2D(double x, double y, double max=1, int mode=0, int octaves=8, double freqStart=0.05, 
-            double freqRate=0.5, double ampRate=0.5);
+            double freqRate=2, double ampRate=0.5);
     void fractalPerlin2D(glm::vec3& pos, double max=1, int mode=0, int octaves=8, double freqStart=0.05, 
-            double freqRate=0.5, double ampRate=0.5);
+            double freqRate=2, double ampRate=0.5);
 private:
     class Gradient2 {
     public:
