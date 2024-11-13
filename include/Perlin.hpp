@@ -10,6 +10,11 @@ T easeCurve(T t) { // f(t) = 6 * t^6 - 15 * t^5 + 10 * t^3
     return ((6 * t - 15) * t + 10) * t * t * t;
 }
 
+template <typename T>
+T easeCurveGradient(T t) {
+    return (t * t - 2 * t + 1) * 30 * t * t;
+}
+
 class GradientNoise {
 public:
     GradientNoise();
@@ -17,8 +22,8 @@ public:
     ~GradientNoise();
 
     double perlin1D(double x);
-    double perlin2D(double x, double y);
-    void perlin2D(glm::vec3& pos);
+    glm::vec3 perlin2D(double x, double y);
+    glm::vec3 perlin2D(glm::vec3& pos);
 
     double fractalPerlin1D(double x, int octaves=8, double freqStart=0.05, 
             double freqRate=0.5, double ampRate=0.5);

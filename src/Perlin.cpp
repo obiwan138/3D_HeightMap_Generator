@@ -99,7 +99,7 @@ double GradientNoise::fractalPerlin1D(double x, int octaves, double freqStart, d
     return y;
 }
 
-double GradientNoise::perlin2D(double x, double y) {
+glm::vec3 GradientNoise::perlin2D(double x, double y) {
     double u = x - floor(x);
     double v = y - floor(y);
     double n00 = glm::dot(_gradient2.at(floor(x), floor(y)), glm::vec2(u, v));
@@ -108,7 +108,9 @@ double GradientNoise::perlin2D(double x, double y) {
     double n11 = glm::dot(_gradient2.at(floor(x)+1, floor(y)+1), glm::vec2(u-1, v-1));
     double nx0 = n00 * (1 - easeCurve<double>(u)) + n10 * easeCurve<double>(u);
     double nx1 = n01 * (1 - easeCurve<double>(u)) + n11 * easeCurve<double>(u);
-    return nx0 * (1 - easeCurve<double>(v)) + nx1 * easeCurve<double>(v);
+    return glm::vec3(easeCurveGradient<double>(u) * (n10 - n00 + (n00 - n10 - n01 + n11) * easeCurve<double>(v)),
+            easeCurveGradient<double>(v) * (n00 - n01 + (n00 - n10 - n01 + n11) * easeCurve<double>(u)),
+            nx0 * (1 - easeCurve<double>(v)) + nx1 * easeCurve<double>(v));
 }
 
 double GradientNoise::fractalPerlin2D(double x, double y, double max, int mode, int octaves, double freqStart, double freqRate, double ampRate) {
@@ -117,11 +119,14 @@ double GradientNoise::fractalPerlin2D(double x, double y, double max, int mode, 
     double amplitude = 1;
     if (mode == 1 || mode == 2)
         freq = freq / 2;
+    
     for (int k = 0; k < octaves; k++) {
-        if (mode == 1 || mode == 2) // Turbulent or opalescent
-            height += amplitude * abs(perlin2D(x*freq, y*freq));
+        glm::vec3 noise = perlin2D(x*freq, y*freq);
+        if (k == 0 && mode == 3) amplitude / (sqrt(noise.x * noise.x + noise.y * noise.y) + 0.8);
+        if (mode == 1 || mode == 2)  // Turbulent or opalescent
+            height += amplitude * abs(noise.z);
         else // Standard fractal
-            height += amplitude * perlin2D(x*freq, y*freq);
+            height += amplitude * noise.z;
         amplitude *= ampRate;
         freq *= freqRate;
     }
@@ -140,11 +145,15 @@ void GradientNoise::fractalPerlin2D(glm::vec3& pos, double max, int mode, int oc
     double amplitude = 1;
     if (mode == 1 || mode == 2)
         freq = freq / 2;
+
     for (int k = 0; k < octaves; k++) {
+        glm::vec3 noise = perlin2D(pos.x*freq, pos.y*freq);
+        if (k == 0 && mode == 3) amplitude / (sqrt(noise.x * noise.x + noise.y * noise.y) + 0.8);
+        
         if (mode == 1 || mode == 2) // Turbulent or opalescent
-            pos.y += amplitude * abs(perlin2D(pos.x*freq, pos.z*freq));
+            pos.y += amplitude * abs(noise.z);
         else // Standard fractal
-            pos.y += amplitude * perlin2D(pos.x*freq, pos.z*freq);
+            pos.y += amplitude * noise.z;
         amplitude *= ampRate;
         freq *= freqRate;
     }
