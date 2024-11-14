@@ -149,7 +149,7 @@ int main( void )
 	std::cout << "manager created" << std::endl;
 
 	//Init the buffers
-	manager.initBuffers(&colorMap);
+	manager.prepareToRender(&colorMap);
 
 	/********************************************************************
 	 * Main loop
