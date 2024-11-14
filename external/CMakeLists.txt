@@ -1,3 +1,5 @@
+# CmakeLists of ECE4122-FP/external
+
 if(MSVC AND NOT "${MSVC_VERSION}" LESS 1400)
 	add_definitions( "/MP" )
 endif()
@@ -176,4 +178,9 @@ add_subdirectory( bullet-2.81-rev2613/src/BulletSoftBody )
 add_subdirectory( bullet-2.81-rev2613/src/BulletCollision )
 add_subdirectory( bullet-2.81-rev2613/src/BulletDynamics )
 add_subdirectory( bullet-2.81-rev2613/src/LinearMath )
+
+### SFML ###
+# SFML already has a CMakeLists, so let's just add the directory
+add_subdirectory(SFML)
+
 
