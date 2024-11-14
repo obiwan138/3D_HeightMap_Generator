@@ -87,3 +87,83 @@ void ChunkManager::update(glm::vec3 pos){
 		m_center.z -= m_chunkSize;
 	}
 }
+
+
+/////////////////////////////////////////////////////////////////////
+/**
+ * @author Thomas Etheve
+ * @brief Initialize the buffers for the chunk
+ * @param cmapPointer : Pointer to the color map
+ */
+
+void ChunkManager::prepareToRender(ColorMap* cmapPointer)
+{
+	// Loop through the chunk map
+	for (auto elementIt = this->chunkMap.begin(); elementIt != this->chunkMap.end(); elementIt++)
+	{
+		// Initialize the buffers for the current chunk
+		elementIt->second.prepareToRender(cmapPointer);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+/**
+ * @author Thomas Etheve
+ * @brief Render chunks
+ * @param shaderProgram : pointer to the shader program
+ */
+void ChunkManager::renderChunks(GLuint* shaderProgramPointer)
+{
+	// Iterate through the chunk map
+	for (auto chunkIt = this->chunkMap.begin(); chunkIt != this->chunkMap.end(); chunkIt++)
+	{
+		// Render the current chunk
+		chunkIt->second.renderChunk(shaderProgramPointer);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+/**
+ * @author Thomas Etheve
+ * @brief Get the edges of the chunk map
+ * @return Edge2D : The edges of the chunk map
+ */
+/*
+Edge2D ChunkManager::getEdges()
+{
+	// Create the variable to return
+	Edge2D edge;
+	edge.left = 0.f; edge.right = 0.f;
+	edge.top = 0.f; edge.bottom = 0.f;
+
+	// Loop through the chunk map
+	for(auto& ChunkIt : this->chunkMap)
+	{
+		// Get the chunk coordinates
+		std::pair<int,int> chunkCellCoords = ChunkIt.first;
+		// Get the chunk size
+		double chunkSize = ChunkIt.second.size();
+
+		// Compare the edges
+		if(chunkCellCoords.first*chunkSize - chunkSize / 2.0 < edge.left)	// Left
+		{
+			edge.left = chunkCellCoords.first*chunkSize - chunkSize / 2.0;
+		}
+		if(chunkCellCoords.first*chunkSize + chunkSize / 2.0 > edge.right)  // Right
+		{
+			edge.right = chunkCellCoords.first*chunkSize + chunkSize / 2.0;
+		}
+		if(chunkCellCoords.second*chunkSize + chunkSize / 2.0 > edge.top)   // Top
+		{
+			edge.top = chunkCellCoords.second*chunkSize + chunkSize / 2.0;
+		}
+		if(chunkCellCoords.second*chunkSize - chunkSize / 2.0 < edge.bottom) // Bottom
+		{
+			edge.bottom = chunkCellCoords.second*chunkSize - chunkSize / 2.0;
+		}
+	}
+
+	// Return extremal edges
+	return edge;
+}
+*/

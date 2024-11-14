@@ -7,12 +7,30 @@ Description:
 header for chunkManager
 */
 
-#include <map>
-#include <vector>
+#pragma once
 
-#include <glm/glm.hpp>
-#include "Chunk.hpp"
+// Standard libraries
+#include <map>                    // Used for chunk map
+#include <vector>                 // Used to store vertices
+
+// OpenGL
+#include <GL/glew.h>              // OpenGL Library
+#include <glm/glm.hpp>            // OpenGL Mathematics
+
+// SFML
+#include <SFML/Graphics.hpp>      // Simple and Fast Multimedia Library
+
+// Project headers
 #include "Perlin.hpp"
+#include "Chunk.hpp"
+#include "ColorMap.hpp"           // Init the color buffer
+
+struct Edge2D {
+    float left;
+    float right;
+    float top;
+    float bottom;
+};
 
 class ChunkManager {
 private:
@@ -24,6 +42,9 @@ private:
     int16_t m_viewDist;
     int64_t m_seed;
 
+    // 2D map view
+    std::vector<sf::Sprite> chunkSprites;
+
     GradientNoise gradientNoise;
 public:
     ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution);
@@ -31,4 +52,17 @@ public:
     std::map<std::pair<int, int>, Chunk> chunkMap;
 
     void update(glm::vec3 pos);
+
+    // Init the buffers
+    void prepareToRender(ColorMap* cmapPointer);
+
+    // Render chunks
+    void renderChunks(GLuint* shaderProgramPointer);
+
+    // Draw 2D map view
+    //void view2DMap();
+
+    // Return the edges of the chunkmap
+    //Edge2D getEdges();
 };
+
