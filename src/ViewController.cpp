@@ -222,3 +222,8 @@ glm::mat4 ViewController::getViewMatrix()
 {
 	return ViewMatrix;
 }
+
+glm::vec3 ViewController::getPosition()
+{
+	return position;
+}

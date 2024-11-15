@@ -151,8 +151,8 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 50;
-	float LENGTH_Z = 50;
+	float LENGTH_X = 20;
+	float LENGTH_Z = 20;
 	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
@@ -162,41 +162,12 @@ int main( void )
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	// Vertices
-	float pi = 3.14159265359f;
-	float y_max = 0;
-	float y_min = 0;
-
-	ChunkManager manager(0, 123, LENGTH_X, resolution);
+	ChunkManager manager(2, 123, LENGTH_X, resolution);
 	std::cout << "manager created" << std::endl;
 
-	std::vector<glm::vec3> vertices = manager.chunkMap[std::pair<int, int>(0, 0)].heightMap;
-	//std::vector<glm::vec3> vertices;
-
-	//for (unsigned int i = 0; i < SIZE_Z; i++) 
-	//{
-	//	for (unsigned int j = 0; j < SIZE_X; j++) 
-	//	{
-	//		// Create a grid centered at origin, scaled to be easily visible
-	//		float x = -1.f*LENGTH_X/2.f + i*resolution;
-	//		float z = -1.f*LENGTH_Z/2.f + j*resolution;
-	//		//float y = sin(2*pi*x/10) * sin(2*pi*z/10);
-	//		float y = 0.0f;
-	//		vertices.push_back(glm::vec3(x,y,z));
-	//		if (y > y_max) 
-	//		{
-	//			y_max = y;
-	//		}
-	//		if (y < y_min) 
-	//		{
-	//			y_min = y;
-	//		}
-	//		std::cout << i * SIZE_Z + j << ": " << x << ", " << y << ", " << z << std::endl;
-	//	}
-	//}
-
-	// Get the associated colors
-	std::vector<glm::vec3> colors = colorMap.getColorVector(vertices);	
+	//make vectors for vertices and colors
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> colors;
 	
 	// Index generation for triangle strips
 	std::vector<unsigned int> indices_triangles_strips;
@@ -221,57 +192,22 @@ int main( void )
 	// Vertex Buffer Object (VBO) for vertices positions
 	GLuint terrainVBO;									// Declare
 	glGenBuffers(1, &terrainVBO);						// Generate the buffer
-	glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);			// Bind the VBO as the active GL_ARRAY_BUFFER
-	glBufferData(GL_ARRAY_BUFFER, 						// Load data in the active buffer
-				 vertices.size() * sizeof(glm::vec3), 		// Size of the data in bytes
-				 vertices.data(), 							// Pointer to the data
-				 GL_STATIC_DRAW);							// Data is static set once
-
-	glVertexAttribPointer(	// Set the active buffer (VBO) as the attribute 0 of the VAO
-		0,                  	// attribute index (0) for vertices positions
-		3,                  	// size of each elemeent (3 floats)
-		GL_FLOAT,           	// type of each subelement
-		GL_FALSE,           	// normalized?
-		0,						// Offset between consecutive elements
-		(void*)0            	// Array buffer offset
-	);
-
-	glEnableVertexAttribArray(0);  // Enable the buffer for the shader
 
 	// Vetex Buffer Object (VBO) for the colors
 	GLuint colorVBO;									// Declare
 	glGenBuffers(1, &colorVBO);							// Generate the buffer
-	glBindBuffer(GL_ARRAY_BUFFER, colorVBO);			// Bind the VBO as the active GL_ARRAY_BUFFER
-	glBufferData(GL_ARRAY_BUFFER, 						// Load data in the active buffer
-				 colors.size() * sizeof(glm::vec3), 		// Size of the data in bytes
-				 colors.data(), 							// Pointer to the data
-				 GL_STATIC_DRAW);							// Data is static set once
-	
-	glVertexAttribPointer(	// Set the active buffer (VBO) as the attribute 0 of the VAO
-		1,                  	// attribute index (1) for colors
-		3,                  	// size of each elemeent (3 floats)
-		GL_FLOAT,           	// type of each subelement
-		GL_FALSE,           	// normalized?
-		0,						// Offset between consecutive elements
-		(void*)0            	// Array buffer offset
-	);
-
-	glEnableVertexAttribArray(1);  // Enable the buffer for the shader
 
 	// Element Buffer Object (EBO)
 	GLuint terrainEBO;									// Declare
 	glGenBuffers(1, &terrainEBO);						// Generate the buffer	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);	// Bind the EBO as the active GL_ELEMENT_ARRAY_BUFFER
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 				// Load data in the active buffer
-				indices_triangles_strips.size() * sizeof(unsigned int), 	// Size of the data in bytes
-				indices_triangles_strips.data(), 							// Pointer to the data
-				GL_STATIC_DRAW);											// Data is static set once
 
 	/********************************************************************
 	 * Main loop
 	 ********************************************************************/
 
 	do{
+		manager.update(viewController.getPosition());
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -304,16 +240,62 @@ int main( void )
 		// Bind VAO (implicitely binds the EBO to GL_ELEMENT_ARRAY_BUFFER)
 		glBindVertexArray(VertexArrayID);
 
-		// Draw the triangles strips by strips
-		for(unsigned strip = 0; strip < NUM_STRIPS; strip++)
-		{
-			// Draw the triangles
-			glDrawElements(
+		for (auto it = manager.chunkMap.begin(); it != manager.chunkMap.end(); it++) {
+			//vertices = manager.chunkMap[std::pair<int, int>(0, 0)].heightMap;
+			vertices = it->second.heightMap;
+			colors = colorMap.getColorVector(vertices);
+
+			glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);			// Bind the VBO as the active GL_ARRAY_BUFFER
+			glBufferData(GL_ARRAY_BUFFER, 						// Load data in the active buffer
+				vertices.size() * sizeof(glm::vec3), 		// Size of the data in bytes
+				vertices.data(), 							// Pointer to the data
+				GL_DYNAMIC_DRAW);
+
+			glVertexAttribPointer(	// Set the active buffer (VBO) as the attribute 0 of the VAO
+				0,                  	// attribute index (0) for vertices positions
+				3,                  	// size of each elemeent (3 floats)
+				GL_FLOAT,           	// type of each subelement
+				GL_FALSE,           	// normalized?
+				0,						// Offset between consecutive elements
+				(void*)0            	// Array buffer offset
+			);
+
+			glEnableVertexAttribArray(0);  // Enable the buffer for the shader
+
+			glBindBuffer(GL_ARRAY_BUFFER, colorVBO);			// Bind the VBO as the active GL_ARRAY_BUFFER
+			glBufferData(GL_ARRAY_BUFFER, 						// Load data in the active buffer
+				colors.size() * sizeof(glm::vec3), 		// Size of the data in bytes
+				colors.data(), 							// Pointer to the data
+				GL_DYNAMIC_DRAW);							// Data is static set once
+
+			glEnableVertexAttribArray(1);  // Enable the buffer for the shader
+
+			glVertexAttribPointer(	// Set the active buffer (VBO) as the attribute 0 of the VAO
+				1,                  	// attribute index (1) for colors
+				3,                  	// size of each elemeent (3 floats)
+				GL_FLOAT,           	// type of each subelement
+				GL_FALSE,           	// normalized?
+				0,						// Offset between consecutive elements
+				(void*)0            	// Array buffer offset
+			);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);	// Bind the EBO as the active GL_ELEMENT_ARRAY_BUFFER
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, 				// Load data in the active buffer
+				indices_triangles_strips.size() * sizeof(unsigned int), 	// Size of the data in bytes
+				indices_triangles_strips.data(), 							// Pointer to the data
+				GL_DYNAMIC_DRAW);
+
+			// Draw the triangles strips by strips
+			for (unsigned strip = 0; strip < NUM_STRIPS; strip++)
+			{
+				// Draw the triangles
+				glDrawElements(
 					GL_TRIANGLE_STRIP,			// Drawing mode : triangle strips save the number indices per strip compared to GL_TRIANGLES
 					NUM_VERTS_PER_STRIP,  		// Number of indices per strip
 					GL_UNSIGNED_INT,			// Type of the indices
 					(void*)(strip * NUM_VERTS_PER_STRIP * sizeof(unsigned int))		// Offset of the first index of the strip in the EBO
 				);
+			}
 		}
 		
 		// Unbind VAO

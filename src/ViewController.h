@@ -58,4 +58,5 @@ class ViewController
 
         int getRenderingMode();
 
+        glm::vec3 getPosition();
 };

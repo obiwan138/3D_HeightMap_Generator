@@ -59,10 +59,11 @@ void ChunkManager::update(glm::vec3 pos){
 
 	//need new chunks in the +x direction
 	if (m_pos.x > m_center.x + m_chunkSize / 2) {
-		//for (int i = 0; i < 1 + m_viewDist * 2; i++) {
-
-		//}
-
+		for (int i = m_center.z / m_chunkSize - m_viewDist; i <= m_center.z / m_chunkSize + m_viewDist; i++) {
+			std::pair<int, int> currentPair(m_center.x / m_chunkSize + m_viewDist + 1, i);
+			std::cout << "current pair " << currentPair.first << ", " << currentPair.second << std::endl;
+			chunkMap.emplace(currentPair, Chunk(m_seed, m_chunkSize, m_resolution, glm::vec2(m_center.x / m_chunkSize + m_viewDist + 1, i)));
+		}
 		m_center.x += m_chunkSize;
 	}
 
