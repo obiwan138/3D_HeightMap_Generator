@@ -106,4 +106,7 @@ class ViewController
         // Get the rendering mode
         int getRenderingMode();
 
+        //get the camera's position
+        glm::vec3 getPosition();
+
 };

@@ -60,7 +60,7 @@ int main( void )
 	settings.minorVersion = 0;
 
 	// Window creation
-    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Heigt Map", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 	window.setVisible(true);				// Make window visible
 	window.setActive(true); 				// Create context for OpenGL
@@ -164,23 +164,6 @@ int main( void )
 	std::cout << "Created lattice of " << NUM_STRIPS << " strips with " << NUM_TRIANGLES_PER_STRIP << " triangles each" << std::endl;
     std::cout << "Created " << NUM_STRIPS * NUM_TRIANGLES_PER_STRIP << " triangles total" << std::endl;
 
-	//// VERTEX ARRAY OBJECT used in the shader
-	//GLuint VertexArrayID;
-	//glGenVertexArrays(1, &VertexArrayID);
-	//glBindVertexArray(VertexArrayID);
-
-	//// Vertex Buffer Object (VBO) for vertices positions
-	//GLuint terrainVBO;									// Declare
-	//glGenBuffers(1, &terrainVBO);						// Generate the buffer
-
-	//// Vetex Buffer Object (VBO) for the colors
-	//GLuint colorVBO;									// Declare
-	//glGenBuffers(1, &colorVBO);							// Generate the buffer
-
-	//// Element Buffer Object (EBO)
-	//GLuint terrainEBO;									// Declare
-	//glGenBuffers(1, &terrainEBO);						// Generate the buffer	
-
 	/********************************************************************
 	 * Main loop
 	 ********************************************************************/
@@ -194,7 +177,7 @@ int main( void )
 		manager.update(viewController.getPosition());
 
 		// Activate the shader program
-		//glUseProgram(programID);
+		glUseProgram(programID);
 
         /********************************************************************
 	 	* Handle closing window event and escape key
@@ -251,81 +234,6 @@ int main( void )
 
 		// Render the chunks in 3D window
 		manager.renderChunks(&programID);
-
-		//for (auto it = manager.chunkMap.begin(); it != manager.chunkMap.end(); it++) {
-		//	//vertices = manager.chunkMap[std::pair<int, int>(0, 0)].heightMap;
-		//	vertices = it->second.heightMap;
-		//	colors = colorMap.getColorVector(vertices);
-
-		//	glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);			// Bind the VBO as the active GL_ARRAY_BUFFER
-		//	glBufferData(GL_ARRAY_BUFFER, 						// Load data in the active buffer
-		//		vertices.size() * sizeof(glm::vec3), 		// Size of the data in bytes
-		//		vertices.data(), 							// Pointer to the data
-		//		GL_DYNAMIC_DRAW);
-
-		//	glVertexAttribPointer(	// Set the active buffer (VBO) as the attribute 0 of the VAO
-		//		0,                  	// attribute index (0) for vertices positions
-		//		3,                  	// size of each elemeent (3 floats)
-		//		GL_FLOAT,           	// type of each subelement
-		//		GL_FALSE,           	// normalized?
-		//		0,						// Offset between consecutive elements
-		//		(void*)0            	// Array buffer offset
-		//	);
-
-		//	glEnableVertexAttribArray(0);  // Enable the buffer for the shader
-
-		//	glBindBuffer(GL_ARRAY_BUFFER, colorVBO);			// Bind the VBO as the active GL_ARRAY_BUFFER
-		//	glBufferData(GL_ARRAY_BUFFER, 						// Load data in the active buffer
-		//		colors.size() * sizeof(glm::vec3), 		// Size of the data in bytes
-		//		colors.data(), 							// Pointer to the data
-		//		GL_DYNAMIC_DRAW);							// Data is static set once
-
-		//	glEnableVertexAttribArray(1);  // Enable the buffer for the shader
-
-		//	glVertexAttribPointer(	// Set the active buffer (VBO) as the attribute 0 of the VAO
-		//		1,                  	// attribute index (1) for colors
-		//		3,                  	// size of each elemeent (3 floats)
-		//		GL_FLOAT,           	// type of each subelement
-		//		GL_FALSE,           	// normalized?
-		//		0,						// Offset between consecutive elements
-		//		(void*)0            	// Array buffer offset
-		//	);
-
-		//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);	// Bind the EBO as the active GL_ELEMENT_ARRAY_BUFFER
-		//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 				// Load data in the active buffer
-		//		indices_triangles_strips.size() * sizeof(unsigned int), 	// Size of the data in bytes
-		//		indices_triangles_strips.data(), 							// Pointer to the data
-		//		GL_DYNAMIC_DRAW);
-
-		//	// Draw the triangles strips by strips
-		//	for (unsigned strip = 0; strip < NUM_STRIPS; strip++)
-		//	{
-		//		// Draw the triangles
-		//		glDrawElements(
-		//			GL_TRIANGLE_STRIP,			// Drawing mode : triangle strips save the number indices per strip compared to GL_TRIANGLES
-		//			NUM_VERTS_PER_STRIP,  		// Number of indices per strip
-		//			GL_UNSIGNED_INT,			// Type of the indices
-		//			(void*)(strip * NUM_VERTS_PER_STRIP * sizeof(unsigned int))		// Offset of the first index of the strip in the EBO
-		//		);
-		//	}
-		
-		/**
-		 * // If the user want to have the 2D map view (press Right Shift)
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
-		{
-			// Get the edges of the chunk map
-			Edge2D edges = manager.getEdges();
-			// Set the 2D map view
-			glMatrixMode(GL_PROJECTION);
-			viewController.view2DMap(&window, edges);
-			glViewport(0, 0, window.getSize().x,  window.getSize().y);
-
-			glViewport(0, 0, window.getSize().x,  window.getSize().y);
-			glMatrixMode(GL_PROJECTION);
-			gluOrtho2D(-1.0*window.getSize().x/window.getSize().y, 1.0*window.getSize().x/window.getSize().y, -1.0, 1.0);
->>>>>>> main
-		}
-		 */
 
 		// end the current frame (internally swaps the front and back buffers)
         window.display();
