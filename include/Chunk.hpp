@@ -10,8 +10,15 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 #pragma once
 
 #include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+
+#include <GL/glew.h>                            // OpenGL Library
+#include <glm/glm.hpp>                          // OpenGL Mathematics
+#include <glm/gtc/matrix_transform.hpp>         // Transformation matrices
+
+#include <SFML/Graphics.hpp>                    // Simple and Fast Multimedia Library
+#include <SFML/Window.hpp>                      // Windowing library
+
+#include "ColorMap.hpp"                         // Init the color buffer
 
 class Chunk {
 private:
@@ -19,6 +26,15 @@ private:
     double m_resolution; //distance between points
     int m_pointsPerSide; //points per side
     glm::vec2 m_chunkCoords;
+
+    // OpenGL variables for 3D rendering
+    GLuint vertexArrayObject;  // Vertex Array Object (VAO) for the chunk, contains vertices and colors VBOs and EBO
+    GLuint vertexBuffer;       // Vertex Buffer Object (VBO) for vertices
+    GLuint colorBuffer;        // Vertex Buffer Object (VBO) for colors 
+    GLuint elementBuffer;      // Element Buffer Object (EBO) for indices
+
+    sf::Texture texture2D;         // Texture for the chunk
+
 public:
     Chunk() {}
     Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords);
@@ -31,6 +47,18 @@ public:
     double size() { return m_chunkSize; }
     double resolution() { return m_resolution; }
     int pointsPerSide() { return m_pointsPerSide; }
+    glm::vec2 chunkCoords() { return m_chunkCoords; }
+
+    // Init buffers
+    void prepareToRender(ColorMap* cmapPointer);
+
+    // Render the 3D chunk
+    void renderChunk(GLuint* shaderProgram);
+
+    // Destructor
+    ~Chunk();
+
+    
 
     //void setHeightMap(T hm) { this->hm = hm; }
     //void setSize(size_t sz) { this->sz = sz; }
