@@ -58,7 +58,8 @@ void ChunkManager::update(glm::vec3 pos){
 				std::forward_as_tuple(currentPair),
 				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
 
-			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			populateChunk(currentPair);
 
 			chunkMap.erase(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
 		}
@@ -73,7 +74,8 @@ void ChunkManager::update(glm::vec3 pos){
 				std::forward_as_tuple(currentPair),
 				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
 
-			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			populateChunk(currentPair);
 
 			chunkMap.erase(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
 		}
@@ -88,7 +90,8 @@ void ChunkManager::update(glm::vec3 pos){
 				std::forward_as_tuple(currentPair),
 				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
 
-			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			populateChunk(currentPair);
 
 			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
 		}
@@ -103,7 +106,8 @@ void ChunkManager::update(glm::vec3 pos){
 				std::forward_as_tuple(currentPair),
 				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
 
-			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			populateChunk(currentPair);
 
 			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
 		}
