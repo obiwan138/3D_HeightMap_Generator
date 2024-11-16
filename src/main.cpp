@@ -19,6 +19,7 @@ This is the main loop for this program. It loads in all of the objects, runs the
 #include <map>
 #include <utility>
 #include <iostream>
+#include <omp.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -128,8 +129,8 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 20;
-	float LENGTH_Z = 20;
+	float LENGTH_X = 10;
+	float LENGTH_Z = 10;
 	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
@@ -139,11 +140,11 @@ int main( void )
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	ChunkManager manager(2, 123, LENGTH_X, resolution);
+	ChunkManager manager(7, 123, LENGTH_X, resolution, &colorMap);
 	std::cout << "manager created" << std::endl;
 
 	//Init the buffers
-	manager.prepareToRender(&colorMap);
+	//manager.prepareToRender(&colorMap);
 
 	//make vectors for vertices and colors
 	std::vector<glm::vec3> vertices;

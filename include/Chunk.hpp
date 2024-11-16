@@ -10,6 +10,7 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 #pragma once
 
 #include <vector>
+#include <atomic>
 
 #include <GL/glew.h>                            // OpenGL Library
 #include <glm/glm.hpp>                          // OpenGL Mathematics
@@ -26,6 +27,7 @@ private:
     double m_resolution; //distance between points
     int m_pointsPerSide; //points per side
     glm::vec2 m_chunkCoords;
+    bool m_preparedToRender;
 
     // OpenGL variables for 3D rendering
     GLuint vertexArrayObject;  // Vertex Array Object (VAO) for the chunk, contains vertices and colors VBOs and EBO
@@ -43,11 +45,13 @@ public:
 
     //make private?
     std::vector<glm::vec3> heightMap;
+    std::atomic<bool> displayable;
 
     double size() { return m_chunkSize; }
     double resolution() { return m_resolution; }
     int pointsPerSide() { return m_pointsPerSide; }
     glm::vec2 chunkCoords() { return m_chunkCoords; }
+    bool preparedToRender() { return m_preparedToRender; }
 
     // Init buffers
     void prepareToRender(ColorMap* cmapPointer);
