@@ -38,15 +38,14 @@ private:
     sf::Texture texture2D;         // Texture for the chunk
 
 public:
+    //constructors
     Chunk() {}
     Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords);
-    //Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
-    //~Chunk() {}
 
-    //make private?
+    //heightmap
     std::vector<glm::vec3> heightMap;
-    std::atomic<bool> displayable;
 
+    //getters and setters
     double size() { return m_chunkSize; }
     double resolution() { return m_resolution; }
     int pointsPerSide() { return m_pointsPerSide; }
@@ -61,12 +60,5 @@ public:
 
     // Destructor
     ~Chunk();
-
-    
-
-    //void setHeightMap(T hm) { this->hm = hm; }
-    //void setSize(size_t sz) { this->sz = sz; }
-    //void setPosition(glm::vec3 pos) { this->pos = pos; }
-
 
 };

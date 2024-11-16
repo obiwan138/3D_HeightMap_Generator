@@ -129,8 +129,8 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 10;
-	float LENGTH_Z = 10;
+	float LENGTH_X = 15;
+	float LENGTH_Z = 15;
 	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
@@ -140,30 +140,8 @@ int main( void )
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	ChunkManager manager(7, 123, LENGTH_X, resolution, &colorMap);
+	ChunkManager manager(1, 123, LENGTH_X, resolution, &colorMap);
 	std::cout << "manager created" << std::endl;
-
-	//Init the buffers
-	//manager.prepareToRender(&colorMap);
-
-	//make vectors for vertices and colors
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> colors;
-	
-	// Index generation for triangle strips
-	std::vector<unsigned int> indices_triangles_strips;
-	for (unsigned int i = 0; i < SIZE_Z - 1; i++) {
-		// For each row, create a triangle strip
-		for (unsigned int j = 0; j < SIZE_X; j++) {
-			// Add vertex from bottom row
-			indices_triangles_strips.push_back(i * SIZE_X + j);
-			// Add vertex from top row
-			indices_triangles_strips.push_back((i + 1) * SIZE_X + j);
-		}
-	}
-
-	std::cout << "Created lattice of " << NUM_STRIPS << " strips with " << NUM_TRIANGLES_PER_STRIP << " triangles each" << std::endl;
-    std::cout << "Created " << NUM_STRIPS * NUM_TRIANGLES_PER_STRIP << " triangles total" << std::endl;
 
 	/********************************************************************
 	 * Main loop
@@ -175,6 +153,7 @@ int main( void )
 	// Main loop
     while (running)
     {
+		//create and destroy chunks as appropriate
 		manager.update(viewController.getPosition());
 
 		// Activate the shader program
