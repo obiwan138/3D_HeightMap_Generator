@@ -16,7 +16,7 @@ This is the chunk management algorithm. It takes in user position, and current c
 
 #include <glm/glm.hpp>
 #include "Chunk.hpp"
-#include "chunkManager.hpp"
+#include "ChunkManager.hpp"
 
 #include <iostream>
 
