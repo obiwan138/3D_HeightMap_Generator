@@ -1,3 +1,12 @@
+/*
+Author: Matthew Luyten
+Class: ECE6122
+Last Date Modified: 11/14/2024
+
+Description:
+.
+*/
+
 #define _USE_MATH_DEFINES
 
 #include "Perlin.hpp"
@@ -5,19 +14,26 @@
 #include <cmath>
 #include <iostream>
 
+/**
+ * GradientNoise default constructor. Initializes random gradient generator with "random" seed based
+ * on system time
+ */
 GradientNoise::GradientNoise() : _gradient1(std::time(NULL)), _gradient2(std::time(NULL)) {}
 
+// Initialize object with desired seed
 GradientNoise::GradientNoise(int64_t seed) : _gradient1(seed), _gradient2(seed) {}
 
 GradientNoise::~GradientNoise() {}
 
+// Initialize 2D gradient generator with desired seed
 GradientNoise::Gradient2::Gradient2(int64_t seed) {
     std::srand(static_cast<uint64_t>(seed));
 }
-    
+
+// Get gradient at integer position (x,y)
 glm::vec2 GradientNoise::Gradient2::at(glm::vec2 position) {
     std::pair<int, int> pos = std::pair<int, int>(position.x, position.y);
-    if (_gradients.count(pos) == 0) {
+    if (_gradients.count(pos) == 0) { // If we havent already generated it, generate it
         _gradients.emplace(pos, generate());
     }
     return _gradients[pos];
@@ -122,7 +138,7 @@ double GradientNoise::fractalPerlin2D(double x, double y, double max, int mode, 
     
     for (int k = 0; k < octaves; k++) {
         glm::vec3 noise = perlin2D(x*freq, y*freq);
-        if (k == 0 && mode == 3) amplitude / (sqrt(noise.x * noise.x + noise.y * noise.y) + 0.8);
+        if (k == 0 && mode == 3) amplitude / (sqrt(noise.x * noise.x + noise.y * noise.y) * 2 + 0.8);
         if (mode == 1 || mode == 2)  // Turbulent or opalescent
             height += amplitude * abs(noise.z);
         else // Standard fractal
@@ -148,7 +164,7 @@ void GradientNoise::fractalPerlin2D(glm::vec3& pos, double max, int mode, int oc
 
     for (int k = 0; k < octaves; k++) {
         glm::vec3 noise = perlin2D(pos.x*freq, pos.z*freq);
-        if (k == 0 && mode == 3) amplitude / (sqrt(noise.x * noise.x + noise.y * noise.y) + 0.8);
+        if (k == 0 && mode == 3) amplitude / (sqrt(noise.x * noise.x + noise.y * noise.y) * 2 + 0.8);
         
         if (mode == 1 || mode == 2) // Turbulent or opalescent
             pos.y += amplitude * abs(noise.z);
