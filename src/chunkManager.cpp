@@ -1,7 +1,7 @@
 /*
 Author: Lydia Jameson
 Class: ECE6122
-Last Date Modified: 10/31/2024
+Last Date Modified: 11/16/2024
 
 Description:
 This is the chunk management algorithm. It takes in user position, and current chunk map then adds and removes chunks to the map as appropriate.
@@ -12,6 +12,7 @@ This is the chunk management algorithm. It takes in user position, and current c
 #include <omp.h>
 #include <thread>
 #include <atomic>
+#include <stdexcept>
 
 #include <glm/glm.hpp>
 #include "Chunk.hpp"
@@ -19,6 +20,11 @@ This is the chunk management algorithm. It takes in user position, and current c
 
 #include <iostream>
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @author Lydia Jameson
+ * @brief Constructor
+ */
 ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer) : gradientNoise(seed) {
 
 	m_viewDist = viewDist;
@@ -35,15 +41,20 @@ ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, flo
 		for (int j = -m_viewDist; j <= m_viewDist; j++) {
 			std::pair<int, int> currentPair(i, j);
 
-			chunkMap.emplace(std::piecewise_construct,
-				std::forward_as_tuple(currentPair),
-				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(i, j)));
-
-			populateChunk(currentPair);
+			if (currentPair == std::pair<int, int>(0, 0)) {
+				populateChunk(currentPair);
+			} else {
+				threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			}
 		}
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @author Lydia Jameson
+ * @brief create and destroy chunks based on camera position
+ */
 void ChunkManager::update(glm::vec3 pos){
 	m_prevPos = m_pos;
 	m_pos = pos;
@@ -53,15 +64,14 @@ void ChunkManager::update(glm::vec3 pos){
 	//need new chunks in the +x direction
 	if (m_pos.x > m_center.x + m_chunkSize / 2) {
 		for (int i = m_center.z / m_chunkSize - m_viewDist; i <= m_center.z / m_chunkSize + m_viewDist; i++) {
+
 			std::pair<int, int> currentPair(m_center.x / m_chunkSize + m_viewDist + 1, i);
-			chunkMap.emplace(std::piecewise_construct,
-				std::forward_as_tuple(currentPair),
-				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
+			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//populateChunk(currentPair);
 
-			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			populateChunk(currentPair);
-
+			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
+			lck.unlock();
 		}
 		m_center.x += m_chunkSize;
 	}
@@ -69,15 +79,14 @@ void ChunkManager::update(glm::vec3 pos){
 	//need new chunks in the -x direction
 	if (m_pos.x < m_center.x - m_chunkSize / 2) {
 		for (int i = m_center.z / m_chunkSize - m_viewDist; i <= m_center.z / m_chunkSize + m_viewDist; i++) {
+
 			std::pair<int, int> currentPair(m_center.x / m_chunkSize - m_viewDist - 1, i);
-			chunkMap.emplace(std::piecewise_construct,
-				std::forward_as_tuple(currentPair),
-				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
+			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//populateChunk(currentPair);
 
-			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			populateChunk(currentPair);
-
+			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
+			lck.unlock();
 		}
 		m_center.x -= m_chunkSize;
 	}
@@ -85,15 +94,14 @@ void ChunkManager::update(glm::vec3 pos){
 	//need new chunks in the +z direction
 	if (m_pos.z > m_center.z + m_chunkSize / 2) {
 		for (int i = m_center.x / m_chunkSize - m_viewDist; i <= m_center.x / m_chunkSize + m_viewDist; i++) {
+
 			std::pair<int, int> currentPair(i, m_center.z / m_chunkSize + m_viewDist + 1);
-			chunkMap.emplace(std::piecewise_construct,
-				std::forward_as_tuple(currentPair),
-				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
+			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//populateChunk(currentPair);
 
-			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			populateChunk(currentPair);
-
+			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
+			lck.unlock();
 		}
 		m_center.z += m_chunkSize;
 	}
@@ -101,51 +109,41 @@ void ChunkManager::update(glm::vec3 pos){
 	//need new chunks in the -z direction
 	if (m_pos.z < m_center.z - m_chunkSize / 2) {
 		for (int i = m_center.x / m_chunkSize - m_viewDist; i <= m_center.x / m_chunkSize + m_viewDist; i++) {
+
 			std::pair<int, int> currentPair(i, m_center.z / m_chunkSize - m_viewDist - 1);
-			chunkMap.emplace(std::piecewise_construct,
-				std::forward_as_tuple(currentPair),
-				std::forward_as_tuple(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second)));
+			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
+			//populateChunk(currentPair);
 
-			//threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			populateChunk(currentPair);
-
+			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
+			lck.unlock();
 		}
 		m_center.z -= m_chunkSize;
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @author Lydia Jameson
+ * @brief create a chunk and populate its height map. Put chunk in chunkmap
+ */
 void ChunkManager::populateChunk(std::pair<int, int> currentPair) {
-	glm::vec3 offset = glm::vec3(m_chunkSize * (currentPair.first - 0.5f), 0, m_chunkSize * (currentPair.second - 0.5f));
+	glm::vec3 offset = glm::vec3((m_chunkSize - m_resolution) * (currentPair.first - 0.5f), 0, (m_chunkSize - m_resolution) * (currentPair.second - 0.5f));
+	//glm::vec3 offset = glm::vec3((m_chunkSize) * (currentPair.first - 0.5f), 0, (m_chunkSize) * (currentPair.second - 0.5f));
 
-	for (int row = 0; row < chunkMap[currentPair].pointsPerSide(); row++) {
-		for (int col = 0; col < chunkMap[currentPair].pointsPerSide(); col++) {
-			chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].z = offset.z + chunkMap[currentPair].resolution() * col;
-			chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col].x = offset.x + chunkMap[currentPair].resolution() * row;
-			gradientNoise.fractalPerlin2D(chunkMap[currentPair].heightMap[row * chunkMap[currentPair].pointsPerSide() + col], 5, 0);
+	Chunk tempChunk(m_seed, m_chunkSize, m_resolution, glm::vec2(currentPair.first, currentPair.second));
+
+	for (int row = 0; row < tempChunk.pointsPerSide(); row++) {
+		for (int col = 0; col < tempChunk.pointsPerSide(); col++) {
+			tempChunk.heightMap[row * tempChunk.pointsPerSide() + col].z = offset.z + tempChunk.resolution() * col;
+			tempChunk.heightMap[row * tempChunk.pointsPerSide() + col].x = offset.x + tempChunk.resolution() * row;
+			gradientNoise.fractalPerlin2D(tempChunk.heightMap[row * tempChunk.pointsPerSide() + col], 5, 0);
 		}
 	}
 
-	chunkMap[currentPair].displayable.store(true);
-}
-
-
-/////////////////////////////////////////////////////////////////////
-/**
- * @author Thomas Etheve
- * @brief Initialize the buffers for the chunk
- * @param cmapPointer : Pointer to the color map
- */
-
-void ChunkManager::prepareToRender(ColorMap* cmapPointer)
-{
-	m_cmapPointer = cmapPointer;
-	// Loop through the chunk map
-	for (auto elementIt = this->chunkMap.begin(); elementIt != this->chunkMap.end(); elementIt++)
-	{
-		// Initialize the buffers for the current chunk
-		elementIt->second.prepareToRender(m_cmapPointer);
-	}
+	std::unique_lock<std::mutex> lck(m_mut);
+	chunkMap.emplace(currentPair, tempChunk);
+	lck.unlock();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -160,11 +158,14 @@ void ChunkManager::renderChunks(GLuint* shaderProgramPointer)
 	for (auto chunkIt = this->chunkMap.begin(); chunkIt != this->chunkMap.end(); chunkIt++)
 	{
 		// Render the current chunk
-		if (chunkIt->second.displayable.load()) {
-			if (!chunkIt->second.preparedToRender()) chunkIt->second.prepareToRender(m_cmapPointer);
-			chunkIt->second.renderChunk(shaderProgramPointer);
+		if (!chunkIt->second.preparedToRender()) {
+			std::unique_lock<std::mutex> lck(m_mut);
+			chunkIt->second.prepareToRender(m_cmapPointer);
+			lck.unlock();
 		}
+		chunkIt->second.renderChunk(shaderProgramPointer);
 	}
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -178,49 +179,3 @@ ChunkManager::~ChunkManager()
 		t.join();
 	}
 }
-
-/////////////////////////////////////////////////////////////////////
-/**
- * @author Thomas Etheve
- * @brief Get the edges of the chunk map
- * @return Edge2D : The edges of the chunk map
- */
-/*
-Edge2D ChunkManager::getEdges()
-{
-	// Create the variable to return
-	Edge2D edge;
-	edge.left = 0.f; edge.right = 0.f;
-	edge.top = 0.f; edge.bottom = 0.f;
-
-	// Loop through the chunk map
-	for(auto& ChunkIt : this->chunkMap)
-	{
-		// Get the chunk coordinates
-		std::pair<int,int> chunkCellCoords = ChunkIt.first;
-		// Get the chunk size
-		double chunkSize = ChunkIt.second.size();
-
-		// Compare the edges
-		if(chunkCellCoords.first*chunkSize - chunkSize / 2.0 < edge.left)	// Left
-		{
-			edge.left = chunkCellCoords.first*chunkSize - chunkSize / 2.0;
-		}
-		if(chunkCellCoords.first*chunkSize + chunkSize / 2.0 > edge.right)  // Right
-		{
-			edge.right = chunkCellCoords.first*chunkSize + chunkSize / 2.0;
-		}
-		if(chunkCellCoords.second*chunkSize + chunkSize / 2.0 > edge.top)   // Top
-		{
-			edge.top = chunkCellCoords.second*chunkSize + chunkSize / 2.0;
-		}
-		if(chunkCellCoords.second*chunkSize - chunkSize / 2.0 < edge.bottom) // Bottom
-		{
-			edge.bottom = chunkCellCoords.second*chunkSize - chunkSize / 2.0;
-		}
-	}
-
-	// Return extremal edges
-	return edge;
-}
-*/

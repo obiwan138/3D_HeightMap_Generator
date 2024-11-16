@@ -1,7 +1,7 @@
 /*
 Author: Lydia Jameson
 Class: ECE6122
-Last Date Modified: 10/31/2024
+Last Date Modified: 11/16/2024
 
 Description:
 header for chunkManager
@@ -13,6 +13,7 @@ header for chunkManager
 #include <map>                    // Used for chunk map
 #include <vector>                 // Used to store vertices
 #include <thread>
+#include <mutex>
 
 // OpenGL
 #include <GL/glew.h>              // OpenGL Library
@@ -35,6 +36,7 @@ struct Edge2D {
 
 class ChunkManager {
 private:
+    std::mutex m_mut;
     glm::vec3 m_pos;
     glm::vec3 m_prevPos;
     glm::vec3 m_center;
