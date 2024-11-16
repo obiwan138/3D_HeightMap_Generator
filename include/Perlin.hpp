@@ -4,6 +4,7 @@
 #include <ctime>
 #include <glm/glm.hpp>
 #include <random>
+#include <mutex>
 
 template <typename T>
 T easeCurve(T t) { // f(t) = 6 * t^6 - 15 * t^5 + 10 * t^3 
@@ -35,6 +36,7 @@ private:
     private:
         glm::vec2 generate();
         std::map<std::pair<int, int>, glm::vec2> _gradients;
+        std::mutex _m;
     };
 
     class Gradient1 {
@@ -44,6 +46,7 @@ private:
     private:
         double generate();
         std::map<int, double> _gradients;
+        std::mutex _m;
     };
 
     Gradient1 _gradient1;

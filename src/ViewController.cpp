@@ -74,13 +74,13 @@ ViewController::ViewController(const sf::Vector2u& windowSize,
  * @author Thomas Etheve
  * @brief Compute the view and the projection matrices from the user input
  */
-void ViewController::computeMatricesFromInputs()
+void ViewController::computeMatricesFromInputs(sf::RenderWindow& window)
 {
 	// Time difference between current and last frame
 	float dt = (this->clock.restart()).asSeconds();
 
 	// Actualize the user look angles and the projection matrix
-	this->updateLook();
+	this->updateLook(window);
 
 	// Actualize the user movement and the view matrix matrix
 	this->updateMove(dt);
@@ -95,15 +95,15 @@ void ViewController::computeMatricesFromInputs()
  * @brief Update the user look angles according to the user inputs
  */
 
-void ViewController::updateLook()
+void ViewController::updateLook(sf::RenderWindow& window)
 {
 	// Get mouse position
-	sf::Vector2i mousePosition = sf::Mouse::getPosition();
+	sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 	double mousePosX = mousePosition.x;
 	double mousePosY = mousePosition.y;
 
 	// Reset mouse position for the next frame
-	sf::Mouse::setPosition(sf::Vector2i(this->windowSize.x / 2, this->windowSize.y / 2));
+	sf::Mouse::setPosition(sf::Vector2i(this->windowSize.x / 2, this->windowSize.y / 2), window);
 
 	// Compute new orientation
 	this->horizontalAngle += this->mouseSpeed * float(this->windowSize.x/2 - mousePosX );

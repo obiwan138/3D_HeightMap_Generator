@@ -75,10 +75,10 @@ class ViewController
                         const float fov_deg);
 
         // Actualize the matrices from the user inputs
-        void computeMatricesFromInputs();
+        void computeMatricesFromInputs(sf::RenderWindow& window);
 
         // Update the user looking direction and fov then compute the projection matrix
-        void updateLook();
+        void updateLook(sf::RenderWindow& window);
 
         // Update the user position and compute the view matrix
         void updateMove(float deltaTime);  
@@ -87,7 +87,7 @@ class ViewController
         void updateTriangleRendering();
 
         // Set the 2D map view
-        void ViewController::view2DMap(sf::RenderWindow* window, const Edge2D& edges);
+        void view2DMap(sf::RenderWindow* window, const Edge2D& edges);
 
         /////////////////// Getters & setters //////////////////////
 

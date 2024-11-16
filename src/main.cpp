@@ -39,7 +39,7 @@ using namespace glm;
 
 // Include project header files
 #include <common/shader.hpp>
-#include "chunkManager.hpp"
+#include "ChunkManager.hpp"
 #include "ViewController.hpp"
 #include "ColorMap.hpp"
 #include "Chunk.hpp"
@@ -68,7 +68,7 @@ int main( void )
 
 	// Hide the mouse cursor and set it to the center of the window
 	window.setMouseCursorVisible(false);
-	sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2));
+	sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2), window);
 
 	/********************************************************************
 	 * Initialize the OpenGL state machine
@@ -194,7 +194,7 @@ int main( void )
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Use the view controller to update the view settins and matrices from user inputs
-		viewController.computeMatricesFromInputs();
+		viewController.computeMatricesFromInputs(window);
 		
 		// Compute the Model Projection View matrix
 		glm::mat4 ProjectionMatrix = viewController.getProjectionMatrix();		// Get the projection matrix
