@@ -7,7 +7,7 @@ Description:
 This is the main loop for this program. It loads in all of the objects, runs the draw loop, and updates the view based on user inputs.
 */
 
-#include "ColorMap.h"
+#include "ColorMap.hpp"
 
 /**
  * @brief Default constructor
@@ -20,7 +20,7 @@ ColorMap::ColorMap()
 
 /**
  * @brief Constructor
- * @arg type : colormap type
+ * @param type : colormap type
  */
 ColorMap::ColorMap(ColorMapType type)
 {
@@ -30,7 +30,7 @@ ColorMap::ColorMap(ColorMapType type)
 
 /**
  * @brief Get the color vector corresponding to the vertices vector
- * @arg vertices : vector of vertices
+ * @param vertices : vector of vertices
  */
 
 std::vector<glm::vec3> ColorMap::getColorVector(const std::vector<glm::vec3>& vertices)
@@ -55,8 +55,8 @@ std::vector<glm::vec3> ColorMap::getColorVector(const std::vector<glm::vec3>& ve
 
 /**
  * @brief Get the color vector corresponding to monorchrome levels
- * @arg vertices : vector of vertices
- * @arg colors : vector of colors
+ * @param vertices : vector of vertices
+ * @param colors : vector of colors
  */
 
 void ColorMap::getMonochromeLevels(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors)
@@ -87,8 +87,8 @@ void ColorMap::getMonochromeLevels(const std::vector<glm::vec3>& vertices, std::
 
 /**
  * @brief Get the color vector corresponding to Earth Gist levels
- * @arg vertices : vector of vertices
- * @arg colors : vector of colors
+ * @param vertices : vector of vertices
+ * @param colors : vector of colors
  */
 void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors)
 {
@@ -144,11 +144,11 @@ void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vecto
 
 /**
  * @brief Interpolate between two colors
- * @arg y1 : first y value
- * @arg y2 : second y value
- * @arg c1 : first color
- * @arg c2 : second color
- * @arg y : y value
+ * @param y1 : first y value
+ * @param y2 : second y value
+ * @param c1 : first color
+ * @param c2 : second color
+ * @param y : y value
  */
 glm::vec3 ColorMap::interpolateColors(const float& y1, const float& y2, const glm::vec3& c1, const glm::vec3& c2, const float& y)
 {

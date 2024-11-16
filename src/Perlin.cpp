@@ -33,7 +33,8 @@ GradientNoise::Gradient2::Gradient2(int64_t seed) {
 // Get gradient at integer position (x,y)
 glm::vec2 GradientNoise::Gradient2::at(glm::vec2 position) {
     std::pair<int, int> pos = std::pair<int, int>(position.x, position.y);
-    if (_gradients.count(pos) == 0) { // If we havent already generated it, generate it
+    std::unique_lock<std::mutex> lock(_m);
+    if (_gradients.count(pos) == 0) {
         _gradients.emplace(pos, generate());
     }
     return _gradients[pos];
@@ -41,6 +42,7 @@ glm::vec2 GradientNoise::Gradient2::at(glm::vec2 position) {
 
 glm::vec2 GradientNoise::Gradient2::at(int x, int y) {
     std::pair<int, int> pos = std::pair<int, int>(x, y);
+    std::unique_lock<std::mutex> lock(_m);
     if (_gradients.count(pos) == 0) {
         _gradients.emplace(pos, generate());
     }

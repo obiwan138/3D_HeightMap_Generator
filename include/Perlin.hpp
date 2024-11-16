@@ -14,6 +14,7 @@ declaration for the GradientNoise class.
 #include <ctime>
 #include <glm/glm.hpp>
 #include <random>
+#include <mutex>
 
 template <typename T>
 T easeCurve(T t) { // f(t) = 6 * t^5 - 15 * t^4 + 10 * t^3 
@@ -60,7 +61,8 @@ private:
         glm::vec2 at(int x, int y); // Returns gradient vector at integer position (x,y)
     private:
         glm::vec2 generate();
-        std::map<std::pair<int, int>, glm::vec2> _gradients; // Map of generated gradients
+        std::map<std::pair<int, int>, glm::vec2> _gradients;
+        std::mutex _m;
     };
     // Keeps track of the 1D gradients in this noise generator.
     class Gradient1 {
@@ -69,7 +71,8 @@ private:
         double at(int x);
     private:
         double generate();
-        std::map<int, double> _gradients; // Map of generated gradients
+        std::map<int, double> _gradients;
+        std::mutex _m;
     };
 
     // 2D and 1D gradient managers
