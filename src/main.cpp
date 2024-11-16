@@ -19,6 +19,7 @@ This is the main loop for this program. It loads in all of the objects, runs the
 #include <map>
 #include <utility>
 #include <iostream>
+#include <omp.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -60,7 +61,7 @@ int main( void )
 	settings.minorVersion = 0;
 
 	// Window creation
-    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Heigt Map", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 	window.setVisible(true);				// Make window visible
 	window.setActive(true); 				// Create context for OpenGL
@@ -128,8 +129,8 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 50;
-	float LENGTH_Z = 50;
+	float LENGTH_X = 10;
+	float LENGTH_Z = 10;
 	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
@@ -139,17 +140,30 @@ int main( void )
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	// Vertices
-	float pi = 3.14159265359f;
-	float y_max = 0;
-	float y_min = 0;
-
-	// Create the chunk manager
-	ChunkManager manager(0, 123, LENGTH_X, resolution);
+	ChunkManager manager(7, 123, LENGTH_X, resolution, &colorMap);
 	std::cout << "manager created" << std::endl;
 
 	//Init the buffers
-	manager.prepareToRender(&colorMap);
+	//manager.prepareToRender(&colorMap);
+
+	//make vectors for vertices and colors
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> colors;
+	
+	// Index generation for triangle strips
+	std::vector<unsigned int> indices_triangles_strips;
+	for (unsigned int i = 0; i < SIZE_Z - 1; i++) {
+		// For each row, create a triangle strip
+		for (unsigned int j = 0; j < SIZE_X; j++) {
+			// Add vertex from bottom row
+			indices_triangles_strips.push_back(i * SIZE_X + j);
+			// Add vertex from top row
+			indices_triangles_strips.push_back((i + 1) * SIZE_X + j);
+		}
+	}
+
+	std::cout << "Created lattice of " << NUM_STRIPS << " strips with " << NUM_TRIANGLES_PER_STRIP << " triangles each" << std::endl;
+    std::cout << "Created " << NUM_STRIPS * NUM_TRIANGLES_PER_STRIP << " triangles total" << std::endl;
 
 	/********************************************************************
 	 * Main loop
@@ -161,6 +175,11 @@ int main( void )
 	// Main loop
     while (running)
     {
+		manager.update(viewController.getPosition());
+
+		// Activate the shader program
+		glUseProgram(programID);
+
         /********************************************************************
 	 	* Handle closing window event and escape key
 	 	********************************************************************/
@@ -216,24 +235,6 @@ int main( void )
 
 		// Render the chunks in 3D window
 		manager.renderChunks(&programID);
-
-		
-		/**
-		 * // If the user want to have the 2D map view (press Right Shift)
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
-		{
-			// Get the edges of the chunk map
-			Edge2D edges = manager.getEdges();
-			// Set the 2D map view
-			glMatrixMode(GL_PROJECTION);
-			viewController.view2DMap(&window, edges);
-			glViewport(0, 0, window.getSize().x,  window.getSize().y);
-
-			glViewport(0, 0, window.getSize().x,  window.getSize().y);
-			glMatrixMode(GL_PROJECTION);
-			gluOrtho2D(-1.0*window.getSize().x/window.getSize().y, 1.0*window.getSize().x/window.getSize().y, -1.0, 1.0);
-		}
-		 */
 
 		// end the current frame (internally swaps the front and back buffers)
         window.display();

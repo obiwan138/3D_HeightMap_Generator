@@ -12,6 +12,7 @@ header for chunkManager
 // Standard libraries
 #include <map>                    // Used for chunk map
 #include <vector>                 // Used to store vertices
+#include <thread>
 
 // OpenGL
 #include <GL/glew.h>              // OpenGL Library
@@ -41,13 +42,16 @@ private:
     float m_resolution;
     int16_t m_viewDist;
     int64_t m_seed;
+    ColorMap* m_cmapPointer;
+
+    std::vector<std::thread> threadVector;
 
     // 2D map view
     std::vector<sf::Sprite> chunkSprites;
 
     GradientNoise gradientNoise;
 public:
-    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution);
+    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer);
 
     std::map<std::pair<int, int>, Chunk> chunkMap;
 
@@ -58,6 +62,12 @@ public:
 
     // Render chunks
     void renderChunks(GLuint* shaderProgramPointer);
+
+    //fill in a chunk's height values
+    void populateChunk(std::pair<int, int> currentPair);
+
+    // Destructor
+    ~ChunkManager();
 
     // Draw 2D map view
     //void view2DMap();
