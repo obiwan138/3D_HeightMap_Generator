@@ -2,6 +2,11 @@
 bindir=$(pwd)
 cd @USERFILE_WORKING_DIRECTORY@
 @USERFILE_ENV_COMMANDS@
+program_options=""
+# Loop through all command line arguments and append them to the string
+for arg in "$@"; do
+    program_options="$program_options $arg"
+done
 if test "x$1" = "x--debugger"; then
 	shift
 	cmd="$1"
@@ -9,10 +14,10 @@ if test "x$1" = "x--debugger"; then
 	if test "x@LAUNCHERS_GOT_GDB@" = "xYES"; then
 		echo "r $@" > $bindir/gdbscript
 		echo "bt" >> $bindir/gdbscript
-		@GDB_COMMAND@ -batch -command=$bindir/gdbscript @LAUNCHERS_GDB_ARG@ $cmd
+		@GDB_COMMAND@ -batch -command=$bindir/gdbscript @LAUNCHERS_GDB_ARG@ $cmd $program_options
 	else
-		$cmd $@
+		$cmd $@ $program_options
 	fi
 else
-	$@
+	$@ $program_options
 fi
