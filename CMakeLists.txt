@@ -10,6 +10,7 @@ project (ECE4122-FP)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 # Debug
 if( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
@@ -60,6 +61,7 @@ link_directories(external/SFML/lib)
 # Name the libraries
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
+	${Boost_LIBRARIES}
 	glfw
 	GLEW_1130
 	sfml-graphics 
@@ -83,7 +85,7 @@ add_definitions(
 # Define sources
 file(GLOB SOURCES src/*.cpp)
 
-# Tutorial 9
+# main
 add_executable(main
   	${SOURCES}								# .cpp source files in /src
 	common/shader.cpp						# Wrapper to load and compile shaders (header)
