@@ -3,8 +3,7 @@ Author: Matthew Luyten
 Class: ECE6122
 Last Date Modified: 11/16/2024
 
-Description:
-.
+Description: 
 */
 
 #define _USE_MATH_DEFINES
@@ -12,22 +11,33 @@ Description:
 #include "Perlin.hpp"
 #include <stddef.h>
 #include <cmath>
-#include <iostream>
 
-/**
- * GradientNoise default constructor. Initializes random gradient generator with "random" seed based
+/** 
+ * @author Matt Luyten
+ * @brief GradientNoise default constructor. Initializes random gradient generator with "random" seed based
  * on system time
  */
 GradientNoise::GradientNoise() : _gradient1(std::time(NULL)), _gradient2(std::time(NULL)) {}
 
 // Initialize object with desired seed
-GradientNoise::GradientNoise(int64_t seed) : _gradient1(seed), _gradient2(seed) {}
+GradientNoise::GradientNoise(uint32_t seed) : _gradient1(seed), _gradient2(seed) {}
 
 GradientNoise::~GradientNoise() {}
 
+uint32_t lfsr(uint32_t seed, size_t shifts) {
+    for (size_t i = 0; i < shifts; i++) {
+        seed |= seed == 0;   // if seed == 0, set seed = 1 instead
+        seed ^= (seed & 0x0007ffff) << 13;
+        seed ^= seed >> 17;
+        seed ^= (seed & 0x07ffffff) << 5;
+        seed = seed & 0xffffffff;
+    }
+    return seed;
+}
+
 // Initialize 2D gradient generator with desired seed
-GradientNoise::Gradient2::Gradient2(int64_t seed) {
-    std::srand(static_cast<uint64_t>(seed));
+GradientNoise::Gradient2::Gradient2(uint32_t seed) {
+    _seed = seed;
 }
 
 // Get gradient at integer position (x,y)
@@ -35,7 +45,7 @@ glm::vec2 GradientNoise::Gradient2::at(glm::vec2 position) {
     std::pair<int, int> pos = std::pair<int, int>(position.x, position.y);
     std::unique_lock<std::mutex> lock(_m);
     if (_gradients.count(pos) == 0) {
-        _gradients.emplace(pos, generate());
+        _gradients.emplace(pos, generate(position.x, position.y));
     }
     return _gradients[pos];
 }
@@ -44,14 +54,18 @@ glm::vec2 GradientNoise::Gradient2::at(int x, int y) {
     std::pair<int, int> pos = std::pair<int, int>(x, y);
     std::unique_lock<std::mutex> lock(_m);
     if (_gradients.count(pos) == 0) {
-        _gradients.emplace(pos, generate());
+        _gradients.emplace(pos, generate(x, y));
     }
     return _gradients[pos];
 }
 
-glm::vec2 GradientNoise::Gradient2::generate() {
+glm::vec2 GradientNoise::Gradient2::generate(int x, int y) {
     int N = 8;
-    uint64_t perm = std::rand() % N;
+    uint32_t perm = lfsr(_seed + x, abs(x)); // Get a random number from 0 to 7
+    perm = lfsr(perm + y, abs(y));
+    perm = perm % N;
+
+    // Return corresponding gradient
     if (perm == 0)
         return glm::vec2(1, 0);
     else if (perm == 1)
@@ -70,20 +84,21 @@ glm::vec2 GradientNoise::Gradient2::generate() {
         return glm::vec2(-0.7071, -0.7071);
 }
 
-GradientNoise::Gradient1::Gradient1(int64_t seed) {
-    std::srand(static_cast<uint64_t>(seed));
+GradientNoise::Gradient1::Gradient1(uint32_t seed) {
+    _seed = seed;
 }
-    
+
 double GradientNoise::Gradient1::at(int x) {
     if (_gradients.count(x) == 0) {
-        _gradients.emplace(x, generate());
+        _gradients.emplace(x, generate(x));
     }
     return _gradients[x];
 }
 
-double GradientNoise::Gradient1::generate() {
-        int N = 5;
-    uint64_t perm = std::rand() % N;
+double GradientNoise::Gradient1::generate(int x) {
+    int N = 5;
+    uint32_t perm = lfsr(_seed + x, abs(x));
+    perm = perm % N;
     if (perm == 0)
         return 1;
     else if (perm == 1)
