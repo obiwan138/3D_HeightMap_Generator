@@ -129,8 +129,8 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 15;
-	float LENGTH_Z = 15;
+	float LENGTH_X = 10;
+	float LENGTH_Z = 10;
 	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
@@ -140,7 +140,7 @@ int main( void )
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	ChunkManager manager(1, 123, LENGTH_X, resolution, &colorMap);
+	ChunkManager manager(3, 123, LENGTH_X, resolution, &colorMap);
 	std::cout << "manager created" << std::endl;
 
 	/********************************************************************
