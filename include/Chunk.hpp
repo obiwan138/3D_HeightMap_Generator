@@ -10,6 +10,7 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 #pragma once
 
 #include <vector>
+#include <atomic>
 
 #include <GL/glew.h>                            // OpenGL Library
 #include <glm/glm.hpp>                          // OpenGL Mathematics
@@ -26,6 +27,7 @@ private:
     double m_resolution; //distance between points
     unsigned int m_pointsPerSide; //points per side
     glm::vec2 m_chunkCoords;
+    bool m_preparedToRender;
 
     // OpenGL variables for 3D rendering
     GLuint vertexArrayObject;  // Vertex Array Object (VAO) for the chunk, contains vertices and colors VBOs and EBO
@@ -37,19 +39,20 @@ private:
     sf::Image image;           // Image for the texture
 
 public:
+    //constructors
     Chunk() {}
     Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords);
-    //Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
-    //~Chunk() {}
 
-    //make private?
+    //heightmap
     std::vector<glm::vec3> heightMap;
 
+    //getters and setters
     double size() { return m_chunkSize; }
     double resolution() { return m_resolution; }
     int pointsPerSide() { return m_pointsPerSide; }
     glm::vec2 chunkCoords() { return m_chunkCoords; }
     sf::Texture* getTexture() { return &(this->texture2D); }
+    bool preparedToRender() { return m_preparedToRender; }
 
     // Init buffers
     void prepareToRender(ColorMap* cmapPointer);
@@ -59,12 +62,5 @@ public:
 
     // Destructor
     ~Chunk();
-
-    
-
-    //void setHeightMap(T hm) { this->hm = hm; }
-    //void setSize(size_t sz) { this->sz = sz; }
-    //void setPosition(glm::vec3 pos) { this->pos = pos; }
-
 
 };

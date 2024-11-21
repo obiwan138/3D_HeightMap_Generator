@@ -76,10 +76,10 @@ class ViewController
                         const float fov_deg);
 
         // Actualize the matrices from the user inputs
-        void computeMatricesFromInputs();
+        void computeMatricesFromInputs(sf::RenderWindow& window);
 
         // Update the user looking direction and fov then compute the projection matrix
-        void updateLook();
+        void updateLook(sf::RenderWindow& window);
 
         // Update the user position and compute the view matrix
         void updateMove(float deltaTime);  
@@ -109,5 +109,7 @@ class ViewController
 
         // Get the the 2D view mode
         bool getViewMode2D();
+        //get the camera's position
+        glm::vec3 getPosition();
 
 };

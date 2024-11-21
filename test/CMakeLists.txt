@@ -21,7 +21,7 @@ add_definitions(
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
-# Tutorial 9
+# perlin-test
 add_executable(perlin-test
     perlin-test.cpp
     ../src/Perlin.cpp

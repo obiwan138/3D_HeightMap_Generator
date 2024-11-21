@@ -19,12 +19,10 @@ This is the main loop for this program. It loads in all of the objects, runs the
 #include <map>
 #include <utility>
 #include <iostream>
+#include <omp.h>
 
 // Include GLEW
 #include <GL/glew.h>
-
-// Include GLFW
-//#include <GLFW/glfw3.h>
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -36,17 +34,60 @@ using namespace glm;
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
 
+// Include boost
+#include <boost/program_options.hpp>
+
 // Include project header files
 #include <common/shader.hpp>
-#include "chunkManager.hpp"
+#include "ChunkManager.hpp"
 #include "ViewController.hpp"
 #include "ColorMap.hpp"
 #include "Chunk.hpp"
 
+namespace po = boost::program_options;
+
 void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount);
 
-int main( void )
+int main(int argc, char* argv[])
 {
+	/********************************************************************
+	 * Parse command line arguments
+	 ********************************************************************/
+	std::srand(time(NULL)); // Seed random number generator for 
+	po::variables_map arguments;  
+    try {
+		// Define all program options
+        po::options_description desc("Allowed options");
+        desc.add_options()
+            ("help,h", "print help")
+            ("size,s", po::value<size_t>()->default_value(100), "set N, the width of each chunk. Each chunk will be size NxN")
+            ("octaves,o", po::value<int>()->default_value(8), "set number of octaves for fractal perlin noise")
+            ("seed", po::value<uint32_t>()->default_value(std::rand()), "set 64bit seed for perlin noise")
+            ("freq-start", po::value<double>()->default_value(0.05), "set starting frequency for fractal perlin noise")
+            ("freq-rate", po::value<double>()->default_value(2), "set frequency rate for fractal perlin noise")
+            ("amp-rate", po::value<double>()->default_value(0.5), "set amplitude decay rate for fractal perlin noise")
+            ("mode, m", po::value<int>()->default_value(0), "Noise mode (0 - fractal, 1 - turbulent, 2 - opalescent, 3 - gradient weighting)")
+			("max, m", po::value<double>()->default_value(5), "Noise max value")
+        ;
+
+		// Store program options
+        po::store(po::parse_command_line(argc, argv, desc), arguments);
+        po::notify(arguments);
+
+        if (arguments.count("help")) {
+            std::cout << desc << "\n";
+            return 0;
+        }
+    }
+    catch(std::exception& e) {
+		// Handle known exceptions
+        std::cerr << "error: " << e.what() << "\n";
+        return 1;
+    }
+    catch(...) {
+		// Handle unknown exceptions
+        std::cerr << "Exception of unknown type!\n";
+    }
 	/********************************************************************
 	 * Initialize the SFML Window
 	 ********************************************************************/
@@ -60,14 +101,14 @@ int main( void )
 	settings.minorVersion = 0;
 
 	// Window creation
-    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Heigt Map", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 	window.setVisible(true);				// Make window visible
 	window.setActive(true); 				// Create context for OpenGL
 
 	// Hide the mouse cursor and set it to the center of the window
 	window.setMouseCursorVisible(false);
-	sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2));
+	sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2), window);
 
 	/********************************************************************
 	 * Initialize the OpenGL state machine
@@ -128,8 +169,8 @@ int main( void )
 	 ********************************************************************/
 
 	// Bounds
-	float LENGTH_X = 50;
-	float LENGTH_Z = 50;
+	float LENGTH_X = 15;
+	float LENGTH_Z = 15;
 	float resolution = 0.5f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
@@ -139,17 +180,8 @@ int main( void )
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	// Vertices
-	float pi = 3.14159265359f;
-	float y_max = 0;
-	float y_min = 0;
-
-	// Create the chunk manager()
-	ChunkManager manager(0, 123, LENGTH_X, resolution);
+	ChunkManager manager(1, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
 	std::cout << "manager created" << std::endl;
-
-	//Init the buffers
-	manager.prepareToRender(&colorMap);
 
 	/********************************************************************
 	 * Main loop
@@ -161,6 +193,12 @@ int main( void )
 	// Main loop
     while (running)
     {
+		//create and destroy chunks as appropriate
+		manager.update(viewController.getPosition());
+
+		// Activate the shader program
+		glUseProgram(programID);
+
         /********************************************************************
 	 	* Handle closing window event and escape key
 	 	********************************************************************/
@@ -193,7 +231,7 @@ int main( void )
 	 	********************************************************************/
 
 		// Use the view controller to update the view settins and matrices from user inputs
-		viewController.computeMatricesFromInputs();
+		viewController.computeMatricesFromInputs(window);
 
 		// Compute the Model View Projection matrix
 		glm::mat4 MVP = viewController.getProjectionMatrix() 

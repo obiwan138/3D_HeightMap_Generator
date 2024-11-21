@@ -1,7 +1,7 @@
 /*
 Author: Lydia Jameson
 Class: ECE6122
-Last Date Modified: 11/03/2024
+Last Date Modified: 11/16/2024
 
 Description:
 
@@ -12,11 +12,16 @@ Description:
 
 #include "Chunk.hpp"
 
-
+///////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @author Lydia Jameson
+ * @brief Constructor
+ */
 Chunk::Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords) {
 	m_chunkSize = chunkSize;
 	m_resolution = resolution;
 	m_chunkCoords = chunkCoords;
+	m_preparedToRender = false;
 	m_pointsPerSide = static_cast<unsigned int>(m_chunkSize / m_resolution);
 
 	heightMap = std::vector<glm::vec3>(m_pointsPerSide * m_pointsPerSide, glm::vec3(0, 0, 0));
@@ -125,6 +130,8 @@ void Chunk::prepareToRender(ColorMap* cmapPointer)
 
 	// Update the texture with the computed image
 	this->texture2D.update(this->image);
+
+	m_preparedToRender = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -138,14 +145,14 @@ void Chunk::renderChunk(GLuint* shaderProgramPointer)
 {
 	// Activate the shader program
 	glUseProgram(*shaderProgramPointer);
-
+	
 	// Compute the number of strips and vertices per strip
 	unsigned int nStrips = this->m_pointsPerSide-1;
 	unsigned int nVertsPerStrip = this->m_pointsPerSide*2;
-
+	
 	// Bind the VAO
 	glBindVertexArray(this->vertexArrayObject);
-
+	
 	// Draw the triangles strips by strips
 	for(unsigned strip = 0; strip < nStrips; strip++)
 	{
@@ -157,9 +164,10 @@ void Chunk::renderChunk(GLuint* shaderProgramPointer)
 				(void*)(strip * nVertsPerStrip * sizeof(unsigned int))		// Offset of the first index of the strip in the EBO
 			);
 	}
-
+	
 	// Unbind VAO
 	glBindVertexArray(0);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
