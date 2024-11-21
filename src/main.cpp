@@ -144,7 +144,7 @@ int main( void )
 	float y_max = 0;
 	float y_min = 0;
 
-	// Create the chunk manager
+	// Create the chunk manager()
 	ChunkManager manager(0, 123, LENGTH_X, resolution);
 	std::cout << "manager created" << std::endl;
 
@@ -192,50 +192,50 @@ int main( void )
 	 	* Actualize the scene
 	 	********************************************************************/
 
-		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		// Use the view controller to update the view settins and matrices from user inputs
 		viewController.computeMatricesFromInputs();
-		
-		// Compute the Model Projection View matrix
-		glm::mat4 ProjectionMatrix = viewController.getProjectionMatrix();		// Get the projection matrix
-		glm::mat4 ViewMatrix = viewController.getViewMatrix();					// Get the view matrix
-		glm::mat4 ModelMatrix = glm::mat4(1.0f);								// Model matrix (set at origin)
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;			// Model View Projection matrix
 
-		// Send the matrices to the shader
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		// Compute the Model View Projection matrix
+		glm::mat4 MVP = viewController.getProjectionMatrix() 
+						* viewController.getViewMatrix() 
+						* glm::mat4(1.0f);		
 
-        /********************************************************************
-	 	* Draw the terrain
-	 	********************************************************************/
-
-		// Change the triangles rendering mode by pressing the key P ( GL_FILL (Filled Triangles) or GL_LINE (Wireframe))
-		glPolygonMode(GL_FRONT_AND_BACK, viewController.getRenderingMode()); 
-
-		// Render the chunks in 3D window
-		manager.renderChunks(&programID);
-
-		
-		/**
-		 * // If the user want to have the 2D map view (press Right Shift)
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
+		// Render the chunks in 3D or 2D mode
+		if(viewController.getViewMode2D())
 		{
-			// Get the edges of the chunk map
-			Edge2D edges = manager.getEdges();
-			// Set the 2D map view
-			glMatrixMode(GL_PROJECTION);
-			viewController.view2DMap(&window, edges);
-			glViewport(0, 0, window.getSize().x,  window.getSize().y);
+			window.pushGLStates();
 
-			glViewport(0, 0, window.getSize().x,  window.getSize().y);
-			glMatrixMode(GL_PROJECTION);
-			gluOrtho2D(-1.0*window.getSize().x/window.getSize().y, 1.0*window.getSize().x/window.getSize().y, -1.0, 1.0);
+			
+			window.clear();
+			manager.drawChunks(&window);
+        	
+
+			// Restore the OpenGL states (bing back to the current context)
+			window.popGLStates();
 		}
-		 */
+		else
+		{
+			// Use the shader program
+			glUseProgram(programID);
 
-		// end the current frame (internally swaps the front and back buffers)
+			// Clear the screen
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// Change the triangles rendering mode by pressing the key P ( GL_FILL (Filled Triangles) or GL_LINE (Wireframe))
+			glPolygonMode(GL_FRONT_AND_BACK, viewController.getRenderingMode()); 		
+
+			// Send the matrix to the shader
+			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+			// Render the chunks
+			manager.renderChunks(&programID);
+
+			// Unbind Open GL states
+			glBindVertexArray(0);	// Unbind the VAO
+			glUseProgram(0);		// Unbind the shader program
+		}
+
+		// End the current frame (internally swaps the front and back buffers of the window)
         window.display();
 	}
 

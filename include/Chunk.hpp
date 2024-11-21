@@ -24,7 +24,7 @@ class Chunk {
 private:
     double m_chunkSize;
     double m_resolution; //distance between points
-    int m_pointsPerSide; //points per side
+    unsigned int m_pointsPerSide; //points per side
     glm::vec2 m_chunkCoords;
 
     // OpenGL variables for 3D rendering
@@ -33,7 +33,8 @@ private:
     GLuint colorBuffer;        // Vertex Buffer Object (VBO) for colors 
     GLuint elementBuffer;      // Element Buffer Object (EBO) for indices
 
-    sf::Texture texture2D;         // Texture for the chunk
+    sf::Texture texture2D;     // Texture for the chunk
+    sf::Image image;           // Image for the texture
 
 public:
     Chunk() {}
@@ -48,6 +49,7 @@ public:
     double resolution() { return m_resolution; }
     int pointsPerSide() { return m_pointsPerSide; }
     glm::vec2 chunkCoords() { return m_chunkCoords; }
+    sf::Texture* getTexture() { return &(this->texture2D); }
 
     // Init buffers
     void prepareToRender(ColorMap* cmapPointer);

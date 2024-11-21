@@ -104,6 +104,9 @@ void ChunkManager::prepareToRender(ColorMap* cmapPointer)
 		// Initialize the buffers for the current chunk
 		elementIt->second.prepareToRender(cmapPointer);
 	}
+
+	// Prepare 2d map
+	this->make2DMap();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -122,48 +125,48 @@ void ChunkManager::renderChunks(GLuint* shaderProgramPointer)
 	}
 }
 
+
 /////////////////////////////////////////////////////////////////////
 /**
  * @author Thomas Etheve
- * @brief Get the edges of the chunk map
- * @return Edge2D : The edges of the chunk map
+ * @brief Generate the 2D map view
+ * @param windowSize : The size of the window
  */
-/*
-Edge2D ChunkManager::getEdges()
+void ChunkManager::make2DMap()
 {
-	// Create the variable to return
-	Edge2D edge;
-	edge.left = 0.f; edge.right = 0.f;
-	edge.top = 0.f; edge.bottom = 0.f;
+	// Create as many sprites as there are chunks
+	this->chunkSprites.clear();
 
 	// Loop through the chunk map
-	for(auto& ChunkIt : this->chunkMap)
+	for(auto elementIt = this->chunkMap.begin(); elementIt != this->chunkMap.end(); ++elementIt)
 	{
-		// Get the chunk coordinates
-		std::pair<int,int> chunkCellCoords = ChunkIt.first;
-		// Get the chunk size
-		double chunkSize = ChunkIt.second.size();
+		// Create the sprite
+		sf::Sprite sprite;
+		sprite.setTexture(*(elementIt->second.getTexture()));
 
-		// Compare the edges
-		if(chunkCellCoords.first*chunkSize - chunkSize / 2.0 < edge.left)	// Left
-		{
-			edge.left = chunkCellCoords.first*chunkSize - chunkSize / 2.0;
-		}
-		if(chunkCellCoords.first*chunkSize + chunkSize / 2.0 > edge.right)  // Right
-		{
-			edge.right = chunkCellCoords.first*chunkSize + chunkSize / 2.0;
-		}
-		if(chunkCellCoords.second*chunkSize + chunkSize / 2.0 > edge.top)   // Top
-		{
-			edge.top = chunkCellCoords.second*chunkSize + chunkSize / 2.0;
-		}
-		if(chunkCellCoords.second*chunkSize - chunkSize / 2.0 < edge.bottom) // Bottom
-		{
-			edge.bottom = chunkCellCoords.second*chunkSize - chunkSize / 2.0;
-		}
+		// Add the pair (coords, sprite) to the map
+		this->chunkSprites.emplace(elementIt->first, sprite);
 	}
-
-	// Return extremal edges
-	return edge;
 }
-*/
+
+/////////////////////////////////////////////////////////////////////
+/**
+ * @brief Draw the 2D map view
+ * @param window : The window to draw the 2D map view
+ */
+void ChunkManager::drawChunks(sf::RenderWindow* window)
+{
+	// Loop through the sprites
+	for(auto elementIt = this->chunkSprites.begin(); elementIt != this->chunkSprites.end(); ++elementIt)
+	{
+		// Get some data from the current element
+		std::pair<int,int> chunkCoords = elementIt->first;		// Chunk Coord in the Chunk map cell grid
+		float chunkSize = this->chunkMap[chunkCoords].size();	// Chunk size (distance)
+		
+		// Set the sprite position
+		elementIt->second.setPosition(window->getSize().x/2 + (-0.5f + chunkCoords.first)*chunkSize,  window->getSize().y/2  + (-0.5f + chunkCoords.second)*chunkSize);
+		// Draw the sprite
+		
+		window->draw(elementIt->second);
+	}
+}

@@ -43,7 +43,8 @@ private:
     int64_t m_seed;
 
     // 2D map view
-    std::vector<sf::Sprite> chunkSprites;
+    std::map<std::pair<int, int>, sf::Sprite> chunkSprites;
+
 
     GradientNoise gradientNoise;
 public:
@@ -59,10 +60,10 @@ public:
     // Render chunks
     void renderChunks(GLuint* shaderProgramPointer);
 
-    // Draw 2D map view
-    //void view2DMap();
+    // Construct the initial 2D map view
+    void make2DMap();
 
-    // Return the edges of the chunkmap
-    //Edge2D getEdges();
+    // Draw the 2D map view
+    void drawChunks(sf::RenderWindow* window);
 };
 
