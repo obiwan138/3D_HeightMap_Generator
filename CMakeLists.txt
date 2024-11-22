@@ -1,5 +1,5 @@
 # CMake entry point
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.30)
 
 # Define the project 
 project (ECE4122-FP)
@@ -10,6 +10,10 @@ project (ECE4122-FP)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
+find_package(Boost CONFIG REQUIRED COMPONENTS program_options)
+
+# Add a preprocessor definition to avoid automatic linking issues (if needed)
+add_definitions(-DBOOST_ALL_NO_LIB)
 
 # Debug
 if( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
@@ -50,8 +54,9 @@ include_directories(
 	external/bullet-2.81-rev2613/src/
 	external/SFML/include
 	./
-  include/
-  src/
+  	include/
+  	src/
+	${Boost_INCLUDE_DIRS}
 )
 
 # Link the executable to the SFML libraries
@@ -60,6 +65,7 @@ link_directories(external/SFML/lib)
 # Name the libraries
 set(ALL_LIBS
 	${OPENGL_LIBRARY}
+	${Boost_LIBRARIES}
 	glfw
 	GLEW_1130
 	sfml-graphics 
@@ -83,7 +89,7 @@ add_definitions(
 # Define sources
 file(GLOB SOURCES src/*.cpp)
 
-# Tutorial 9
+# main
 add_executable(main
   	${SOURCES}								# .cpp source files in /src
 	common/shader.cpp						# Wrapper to load and compile shaders (header)

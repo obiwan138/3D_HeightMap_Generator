@@ -26,7 +26,7 @@ This is the chunk management algorithm. It takes in user position, and current c
  * @author Lydia Jameson
  * @brief Constructor
  */
-ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer) : gradientNoise(seed) {
+ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer, po::variables_map args) : gradientNoise(seed) {
 
 	m_viewDist = viewDist;
 	m_seed = seed;
@@ -37,6 +37,7 @@ ChunkManager::ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, flo
 	m_pos = glm::vec3(0, 0, 0);
 	m_prevPos = m_pos;
 	m_center = m_pos;
+	m_args = args;
 
 	for (int i = -m_viewDist; i <= m_viewDist; i++) {
 		for (int j = -m_viewDist; j <= m_viewDist; j++) {
@@ -69,7 +70,6 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::pair<int, int> currentPair(m_center.x / m_chunkSize + m_viewDist + 1, i);
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			//populateChunk(currentPair);
 
 			deletionQueue.push(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
 		}
@@ -137,7 +137,8 @@ void ChunkManager::populateChunk(std::pair<int, int> currentPair) {
 		for (int col = 0; col < tempChunk.pointsPerSide(); col++) {
 			tempChunk.heightMap[row * tempChunk.pointsPerSide() + col].z = offset.z + tempChunk.resolution() * col;
 			tempChunk.heightMap[row * tempChunk.pointsPerSide() + col].x = offset.x + tempChunk.resolution() * row;
-			gradientNoise.fractalPerlin2D(tempChunk.heightMap[row * tempChunk.pointsPerSide() + col], 5, 0);
+			gradientNoise.fractalPerlin2D(tempChunk.heightMap[row * tempChunk.pointsPerSide() + col], m_args["max"].as<double>(), m_args["mode"].as<int>(), 
+										  m_args["octaves"].as<int>(), m_args["freq-start"].as<double>(), m_args["freq-rate"].as<double>(), m_args["amp-rate"].as<double>());
 		}
 	}
 

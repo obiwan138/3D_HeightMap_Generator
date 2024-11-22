@@ -23,10 +23,15 @@ header for chunkManager
 // SFML
 #include <SFML/Graphics.hpp>      // Simple and Fast Multimedia Library
 
+// Include boost
+#include <boost/program_options.hpp>
+
 // Project headers
 #include "Perlin.hpp"
 #include "Chunk.hpp"
 #include "ColorMap.hpp"           // Init the color buffer
+
+namespace po = boost::program_options;
 
 struct Edge2D {
     float left;
@@ -46,6 +51,7 @@ private:
     int16_t m_viewDist;
     int64_t m_seed;
     ColorMap* m_cmapPointer;
+    po::variables_map m_args;
 
     std::vector<std::thread> threadVector;
     std::queue<std::pair<int, int>> deletionQueue;
@@ -55,7 +61,7 @@ private:
 
     GradientNoise gradientNoise;
 public:
-    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer);
+    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer, po::variables_map args);
 
     std::map<std::pair<int, int>, Chunk> chunkMap;
 
