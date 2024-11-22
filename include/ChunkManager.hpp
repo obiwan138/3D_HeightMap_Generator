@@ -14,6 +14,7 @@ header for chunkManager
 #include <vector>                 // Used to store vertices
 #include <thread>
 #include <mutex>
+#include <queue>
 
 // OpenGL
 #include <GL/glew.h>              // OpenGL Library
@@ -53,6 +54,7 @@ private:
     po::variables_map m_args;
 
     std::vector<std::thread> threadVector;
+    std::queue<std::pair<int, int>> deletionQueue;
 
     // 2D map view
     std::vector<sf::Sprite> chunkSprites;

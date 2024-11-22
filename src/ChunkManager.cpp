@@ -13,6 +13,7 @@ This is the chunk management algorithm. It takes in user position, and current c
 #include <thread>
 #include <atomic>
 #include <stdexcept>
+#include <queue>
 
 #include <glm/glm.hpp>
 #include "Chunk.hpp"
@@ -61,6 +62,7 @@ void ChunkManager::update(glm::vec3 pos){
 	m_pos = pos;
 
 	glm::vec3 direction = m_pos - m_prevPos;
+	glm::vec3 distanceFromCenter = m_pos - m_center;
 
 	//need new chunks in the +x direction
 	if (m_pos.x > m_center.x + m_chunkSize / 2) {
@@ -69,9 +71,7 @@ void ChunkManager::update(glm::vec3 pos){
 			std::pair<int, int> currentPair(m_center.x / m_chunkSize + m_viewDist + 1, i);
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
 
-			std::unique_lock<std::mutex> lck(m_mut);
-			chunkMap.erase(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
-			lck.unlock();
+			deletionQueue.push(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
 		}
 		m_center.x += m_chunkSize;
 	}
@@ -84,9 +84,7 @@ void ChunkManager::update(glm::vec3 pos){
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
 			//populateChunk(currentPair);
 
-			std::unique_lock<std::mutex> lck(m_mut);
-			chunkMap.erase(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
-			lck.unlock();
+			deletionQueue.push(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
 		}
 		m_center.x -= m_chunkSize;
 	}
@@ -99,9 +97,7 @@ void ChunkManager::update(glm::vec3 pos){
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
 			//populateChunk(currentPair);
 
-			std::unique_lock<std::mutex> lck(m_mut);
-			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
-			lck.unlock();
+			deletionQueue.push(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
 		}
 		m_center.z += m_chunkSize;
 	}
@@ -114,12 +110,16 @@ void ChunkManager::update(glm::vec3 pos){
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
 			//populateChunk(currentPair);
 
-			std::unique_lock<std::mutex> lck(m_mut);
-			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
-			lck.unlock();
+			deletionQueue.push(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
 		}
 		m_center.z -= m_chunkSize;
 	}
+
+	std::unique_lock<std::mutex> lck(m_mut);
+	if (!deletionQueue.empty() && chunkMap.erase(deletionQueue.front())) {
+		deletionQueue.pop();
+	}
+	lck.unlock();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
