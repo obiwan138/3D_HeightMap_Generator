@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
-	ChunkManager manager(1, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
+	ChunkManager manager(3, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
 	std::cout << "manager created" << std::endl;
 
 	/********************************************************************
