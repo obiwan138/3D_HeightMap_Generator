@@ -70,8 +70,6 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::pair<int, int> currentPair(m_center.x / m_chunkSize + m_viewDist + 1, i);
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-
-			deletionQueue.push(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
 		}
 		m_center.x += m_chunkSize;
 	}
@@ -82,9 +80,6 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::pair<int, int> currentPair(m_center.x / m_chunkSize - m_viewDist - 1, i);
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			//populateChunk(currentPair);
-
-			deletionQueue.push(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
 		}
 		m_center.x -= m_chunkSize;
 	}
@@ -95,9 +90,6 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::pair<int, int> currentPair(i, m_center.z / m_chunkSize + m_viewDist + 1);
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			//populateChunk(currentPair);
-
-			deletionQueue.push(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
 		}
 		m_center.z += m_chunkSize;
 	}
@@ -108,17 +100,24 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::pair<int, int> currentPair(i, m_center.z / m_chunkSize - m_viewDist - 1);
 			threadVector.emplace_back(&ChunkManager::populateChunk, this, currentPair);
-			//populateChunk(currentPair);
-
-			deletionQueue.push(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
 		}
 		m_center.z -= m_chunkSize;
 	}
 
 	std::unique_lock<std::mutex> lck(m_mut);
-	if (!deletionQueue.empty() && chunkMap.erase(deletionQueue.front())) {
-		deletionQueue.pop();
+	//check for chunks that are more than viewDist away
+	for (auto it = chunkMap.begin(); it != chunkMap.end(); it++) {
+		if (abs(it->first.first * m_chunkSize - m_center.x) > m_viewDist * m_chunkSize || abs(it->first.second * m_chunkSize - m_center.z) > m_viewDist * m_chunkSize) {
+			deletionQueue.push(it->first);
+		}
 	}
+
+	while (!deletionQueue.empty()) {
+		if (chunkMap.erase(deletionQueue.front())) {
+			deletionQueue.pop();
+		}
+	}
+
 	lck.unlock();
 }
 

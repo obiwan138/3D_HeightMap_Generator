@@ -240,6 +240,10 @@ void ViewController::updateMove(float dt)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) //(glfwGetKey( window3D, GLFW_KEY_RIGHT ) == GLFW_PRESS)
 	{	
 		this->speed += 0.1f;
+		if (this->speed > 15)
+		{
+			this->speed = 15;
+		}
 	}
 	// Decrease speed
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) // (glfwGetKey( window3D, GLFW_KEY_LEFT ) == GLFW_PRESS)
