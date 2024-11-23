@@ -90,7 +90,6 @@ void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vecto
     glm::vec3 brown = glm::vec3(0.5f,0.27f,0.11f);
     glm::vec3 gray = glm::vec3(0.5f, 0.5f, 0.5f);
     glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
-    glm::vec3 red = glm::vec3(1.f, 0.f, 0.f); // Debug color
 
     // Associate a color to each vertex
     for (const auto& vertex : vertices)
@@ -101,7 +100,6 @@ void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vecto
         }
         else if (vertex.y < SEA_LEVEL*this->minAlt)
         {
-            //colors.push_back(interpolateColors(this->minAlt, SEA_LEVEL, darkBlue, lightBlue, vertex.y));
             colors.push_back(darkBlue);
         }
         else if (vertex.y < MAX_LAND*this->maxAlt)
@@ -120,7 +118,7 @@ void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vecto
         {
             colors.push_back(white);
         }
-        else // Debug color
+        else
         {
             colors.push_back(white);
         }

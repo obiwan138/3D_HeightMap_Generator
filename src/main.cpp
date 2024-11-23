@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 	// Bounds
 	float LENGTH_X = 15;
 	float LENGTH_Z = 15;
-	float resolution = 0.5f;
+	float resolution = 0.25f;
 
 	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
 	unsigned int SIZE_Z = static_cast<unsigned int>(LENGTH_Z / resolution);
