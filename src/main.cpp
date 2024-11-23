@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 								  fov);
 
 	// Color map
-	ColorMap colorMap(ColorMapType::GIST_EARTH);
+	ColorMap colorMap(ColorMapType::GIST_EARTH, -1.f*arguments["max"].as<double>(), arguments["max"].as<double>());
 
 	/********************************************************************
 	 * Create hight map

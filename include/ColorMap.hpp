@@ -22,10 +22,10 @@ enum class ColorMapType
     MONOCHROME_LEVELS,
 };
 
-#define SEA_LEVEL 0.f
-#define MAX_LAND 0.33f
-#define MAX_MOUNTAIN 0.66f
-#define MAX_ALT 1.f
+#define SEA_LEVEL 0.3f          // 0.5f * minAlt, which is already negative
+#define MAX_LAND 0.1f
+#define MAX_MOUNTAIN 0.3f
+#define MAX_ALT 0.6f
 
 class ColorMap
 {
@@ -34,12 +34,15 @@ class ColorMap
         ColorMapType type;
         glm::vec3 MonochromeColor;
 
+        float minAlt;
+        float maxAlt;
+
     public:
         // Default constructor
         ColorMap();
 
         // Constructor
-        ColorMap(ColorMapType type);
+        ColorMap(ColorMapType type, float minAlt, float maxAlt);
 
         // Change the colormap type
         void changeType(ColorMapType type);

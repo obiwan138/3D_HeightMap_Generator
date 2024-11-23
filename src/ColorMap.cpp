@@ -16,16 +16,22 @@ ColorMap::ColorMap()
 {
     this->type = ColorMapType::MONOCHROME_LEVELS;
     this->MonochromeColor = glm::vec3(1, 1, 1);
+    this->minAlt = -1.f;
+    this->maxAlt = 1.f;
 }
 
 /**
  * @brief Constructor
  * @param type : colormap type
+ * @param minAlt : minimum altitude
+ * @param maxAlt : maximum altitude
  */
-ColorMap::ColorMap(ColorMapType type)
+ColorMap::ColorMap(ColorMapType type, float minAlt, float maxAlt)
 {
     this->type = type;
     this->MonochromeColor = glm::vec3(1, 1, 1);
+    this->minAlt = minAlt;
+    this->maxAlt = maxAlt;
 }
 
 /**
@@ -61,26 +67,11 @@ std::vector<glm::vec3> ColorMap::getColorVector(const std::vector<glm::vec3>& ve
 
 void ColorMap::getMonochromeLevels(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors)
 {
-    // Get the min and max values
-    float min = 0;
-    float max = 0;
-    for (const auto& vertex : vertices)
-    {
-        if (vertex.y < min)
-        {
-            min = vertex.y; // If the vertex y-coord is below the min, set the min to the vertex
-        }
-        if (vertex.y > max)
-        {
-            max = vertex.y; // If the vertex y-coord is above the max, set the max to the vertex
-        }
-    }
-
     // Associate a color to each vertex
     for (const auto& vertex : vertices)
     {
         // Compute the color
-        float value = (vertex.y - min) / (max - min);
+        float value = (vertex.y - this->minAlt) / (this->maxAlt - this->minAlt);
         colors.push_back(glm::vec3(value, value, value));
     }
 }
@@ -92,22 +83,6 @@ void ColorMap::getMonochromeLevels(const std::vector<glm::vec3>& vertices, std::
  */
 void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors)
 {
-    // Get the min and max values
-    float min = 0;
-    float max = 0;
-
-    for (const auto& vertex : vertices)
-    {
-        if (vertex.y < min)
-        {
-            min = vertex.y; // If the vertex y-coord is below the min, set the min to the vertex
-        }
-        if (vertex.y > max)
-        {
-            max = vertex.y; // If the vertex y-coord is above the max, set the max to the vertex
-        }
-    }
-
     // Set the color steps 
     glm::vec3 darkBlue = glm::vec3(0.f, 0.f, 1.f);
     glm::vec3 lightBlue = glm::vec3(0.06f, 0.89f, 1.f);
@@ -115,27 +90,37 @@ void ColorMap::getEarthLevels(const std::vector<glm::vec3>& vertices, std::vecto
     glm::vec3 brown = glm::vec3(0.5f,0.27f,0.11f);
     glm::vec3 gray = glm::vec3(0.5f, 0.5f, 0.5f);
     glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
+    glm::vec3 red = glm::vec3(1.f, 0.f, 0.f); // Debug color
 
     // Associate a color to each vertex
     for (const auto& vertex : vertices)
     {
-        if (vertex.y < SEA_LEVEL)
+        if (vertex.y < this->minAlt)
         {
-            colors.push_back(interpolateColors(min, SEA_LEVEL, darkBlue, lightBlue, vertex.y));
+            colors.push_back(darkBlue);
         }
-        else if (vertex.y < MAX_LAND*max)
+        else if (vertex.y < SEA_LEVEL*this->minAlt)
         {
-            colors.push_back(interpolateColors(SEA_LEVEL, MAX_LAND*max, ligthGreen, brown, vertex.y));
+            //colors.push_back(interpolateColors(this->minAlt, SEA_LEVEL, darkBlue, lightBlue, vertex.y));
+            colors.push_back(darkBlue);
         }
-        else if (vertex.y < MAX_MOUNTAIN*max)
+        else if (vertex.y < MAX_LAND*this->maxAlt)
         {
-            colors.push_back(interpolateColors(MAX_LAND*max, MAX_MOUNTAIN*max, brown, gray, vertex.y));
+            colors.push_back(interpolateColors(SEA_LEVEL*this->minAlt, MAX_LAND*this->maxAlt, ligthGreen, brown, vertex.y));
         }
-        else if (vertex.y <= MAX_ALT*max)
+        else if (vertex.y < MAX_MOUNTAIN*this->maxAlt)
         {
-            colors.push_back(interpolateColors(MAX_MOUNTAIN*max, MAX_ALT*max, gray, white, vertex.y));
+            colors.push_back(interpolateColors(MAX_LAND*this->maxAlt, MAX_MOUNTAIN*this->maxAlt, brown, gray, vertex.y));
         }
-        else // Default color
+        else if (vertex.y < MAX_ALT*this->maxAlt)
+        {
+            colors.push_back(interpolateColors(MAX_MOUNTAIN*this->maxAlt, MAX_ALT*this->maxAlt, gray, white, vertex.y));
+        }
+        else if (vertex.y > this->maxAlt)
+        {
+            colors.push_back(white);
+        }
+        else // Debug color
         {
             colors.push_back(white);
         }
