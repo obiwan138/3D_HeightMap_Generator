@@ -66,14 +66,14 @@ public:
 
     void update(glm::vec3 pos);
 
-    // Init the buffers
-    void prepareToRender(ColorMap* cmapPointer);
+    // Init the buffers at first time
+    //void prepareToRender();
 
     // Render chunks
     void renderChunks(GLuint* shaderProgramPointer);
 
     // Construct the initial 2D map view
-    void make2DMap();
+    //void make2DMap();
     //fill in a chunk's height values
     void populateChunk(std::pair<int, int> currentPair);
 

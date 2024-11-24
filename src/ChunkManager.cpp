@@ -70,6 +70,7 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
+			chunkSprites.erase(std::pair<int, int>(currentPair.first - (2 * m_viewDist + 1), currentPair.second));
 			lck.unlock();
 		}
 		m_center.x += m_chunkSize;
@@ -85,6 +86,7 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
+			chunkSprites.erase(std::pair<int, int>(currentPair.first + (2 * m_viewDist + 1), currentPair.second));
 			lck.unlock();
 		}
 		m_center.x -= m_chunkSize;
@@ -100,6 +102,7 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
+			chunkSprites.erase(std::pair<int, int>(currentPair.first, currentPair.second - (2 * m_viewDist + 1)));
 			lck.unlock();
 		}
 		m_center.z += m_chunkSize;
@@ -115,6 +118,7 @@ void ChunkManager::update(glm::vec3 pos){
 
 			std::unique_lock<std::mutex> lck(m_mut);
 			chunkMap.erase(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
+			chunkSprites.erase(std::pair<int, int>(currentPair.first, currentPair.second + (2 * m_viewDist + 1)));
 			lck.unlock();
 		}
 		m_center.z -= m_chunkSize;
@@ -128,19 +132,20 @@ void ChunkManager::update(glm::vec3 pos){
  * @brief Initialize the buffers for the chunk
  * @param cmapPointer : Pointer to the color map
  */
-
-void ChunkManager::prepareToRender(ColorMap* cmapPointer)
+/*
+void ChunkManager::prepareToRender()
 {
 	// Loop through the chunk map
 	for (auto elementIt = this->chunkMap.begin(); elementIt != this->chunkMap.end(); elementIt++)
 	{
 		// Initialize the buffers for the current chunk
-		elementIt->second.prepareToRender(cmapPointer);
+		elementIt->second.prepareToRender(this->m_cmapPointer);
 	}
 
 	// Prepare 2d map
 	this->make2DMap();
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -163,7 +168,10 @@ void ChunkManager::populateChunk(std::pair<int, int> currentPair) {
 	}
 
 	std::unique_lock<std::mutex> lck(m_mut);
+
+	// Add the 3D chunk to the chunk map
 	chunkMap.emplace(currentPair, tempChunk);
+
 	lck.unlock();
 }
 
@@ -178,12 +186,22 @@ void ChunkManager::renderChunks(GLuint* shaderProgramPointer)
 	// Iterate through the chunk map
 	for (auto chunkIt = this->chunkMap.begin(); chunkIt != this->chunkMap.end(); chunkIt++)
 	{
-		// Render the current chunk
+		// If the chunk is not prepared to render yet (buffers and 2d texture not generated), prepare it
 		if (!chunkIt->second.preparedToRender()) {
 			std::unique_lock<std::mutex> lck(m_mut);
+
+			// Prepare the chunk
 			chunkIt->second.prepareToRender(m_cmapPointer);
+
+			// Add the chunk sprite to the sprite map
+			sf::Sprite sprite;										// Create the sprite
+			sprite.setTexture(*(chunkIt->second.getTexture()));		// Set the texture
+			this->chunkSprites.emplace(chunkIt->first, sprite);		// Add the pair (coords, sprite) to the map
+
 			lck.unlock();
 		}
+
+		// Render the chunk
 		chunkIt->second.renderChunk(shaderProgramPointer);
 	}
 }
@@ -195,6 +213,7 @@ void ChunkManager::renderChunks(GLuint* shaderProgramPointer)
  * @brief Generate the 2D map view
  * @param windowSize : The size of the window
  */
+/*
 void ChunkManager::make2DMap()
 {
 	// Create as many sprites as there are chunks
@@ -211,6 +230,7 @@ void ChunkManager::make2DMap()
 		this->chunkSprites.emplace(elementIt->first, sprite);
 	}
 }
+*/
 
 /////////////////////////////////////////////////////////////////////
 /**
@@ -223,13 +243,13 @@ void ChunkManager::drawChunks(sf::RenderWindow* window)
 	for(auto elementIt = this->chunkSprites.begin(); elementIt != this->chunkSprites.end(); ++elementIt)
 	{
 		// Get some data from the current element
-		std::pair<int,int> chunkCoords = elementIt->first;		// Chunk Coord in the Chunk map cell grid
-		float chunkSize = this->chunkMap[chunkCoords].size();	// Chunk size (distance)
+		std::pair<int,int> chunkCoords = elementIt->first;					// Chunk Coord in the Chunk map cell grid
+		sf::FloatRect spriteBounds = elementIt->second.getGlobalBounds();	// Get the sprite bounds
 		
 		// Set the sprite position
-		elementIt->second.setPosition(window->getSize().x/2 + (-0.5f + chunkCoords.first)*chunkSize,  window->getSize().y/2  + (-0.5f + chunkCoords.second)*chunkSize);
-		// Draw the sprite
+		elementIt->second.setPosition(window->getSize().x/2 + (-0.5f + chunkCoords.first)*spriteBounds.width,  window->getSize().y/2  + (-0.5f + chunkCoords.second)*spriteBounds.height);
 		
+		// Draw the sprite
 		window->draw(elementIt->second);
 	}
 }

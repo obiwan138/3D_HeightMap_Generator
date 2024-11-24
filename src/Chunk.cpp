@@ -117,14 +117,14 @@ void Chunk::prepareToRender(ColorMap* cmapPointer)
 	*/
 
 	// Go over the pixels and compute the color of the image
-	for(unsigned int i = 0; i < this->m_pointsPerSide; i++)
+	for(unsigned int i = 0; i < this->m_pointsPerSide; i++)		// Rows - x axis
 	{
-		for(unsigned int j = 0; j < this->m_pointsPerSide; j++)
+		for(unsigned int j = 0; j < this->m_pointsPerSide; j++)	// Columns - z axis
 		{
 			// Get the color for the current pixel from the 1D color vector
 			glm::vec3 color = colors[i * this->m_pointsPerSide + j];
-			// Set the pixel color
-			image.setPixel(j, i, sf::Color(color.x * 255, color.y * 255, color.z * 255));
+			// Set the pixel color (i=x, j =z)
+			image.setPixel(i, j, sf::Color(color.x * 255, color.y * 255, color.z * 255));
 		}
 	}
 

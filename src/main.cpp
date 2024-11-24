@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
 	// Create the view controller object
 	glm::vec3 position = glm::vec3(0.f, 5.f, 0.f);					// User's position
-	float horizontalAngle = 0.f; 	float verticalAngle = 0.f;	// Look angles
+	float horizontalAngle = -3.14f;	float verticalAngle = 0.f;  // Look angles (Toward -z)
 	float speed = 5.f;				float mouseSpeed = 0.005f;		// Speed and Mouse sensitivity
 	float fov = 45.f;												// Field of view (degrees)
 	
@@ -181,6 +181,7 @@ int main(int argc, char* argv[])
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
 	ChunkManager manager(1, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
+
 	std::cout << "manager created" << std::endl;
 
 	/********************************************************************
@@ -233,6 +234,9 @@ int main(int argc, char* argv[])
 		// Use the view controller to update the view settins and matrices from user inputs
 		viewController.computeMatricesFromInputs(window);
 
+		// Change the triangles rendering mode by pressing the key P ( GL_FILL (Filled Triangles) or GL_LINE (Wireframe))
+		glPolygonMode(GL_FRONT_AND_BACK, viewController.getRenderingMode());
+
 		// Compute the Model View Projection matrix
 		glm::mat4 MVP = viewController.getProjectionMatrix() 
 						* viewController.getViewMatrix() 
@@ -241,13 +245,15 @@ int main(int argc, char* argv[])
 		// Render the chunks in 3D or 2D mode
 		if(viewController.getViewMode2D())
 		{
+			// Push out the OpenGL states
 			window.pushGLStates();
 
-			
+			// Clear the window (2D view)
 			window.clear();
+
+			// Draw the chunks as 2D maps
 			manager.drawChunks(&window);
         	
-
 			// Restore the OpenGL states (bing back to the current context)
 			window.popGLStates();
 		}
@@ -259,8 +265,6 @@ int main(int argc, char* argv[])
 			// Clear the screen
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Change the triangles rendering mode by pressing the key P ( GL_FILL (Filled Triangles) or GL_LINE (Wireframe))
-			glPolygonMode(GL_FRONT_AND_BACK, viewController.getRenderingMode()); 		
 
 			// Send the matrix to the shader
 			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);

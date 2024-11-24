@@ -10,7 +10,6 @@ This is the header for the Chunk class. This class manages an NxN chunk of heigh
 #pragma once
 
 #include <vector>
-#include <atomic>
 
 #include <GL/glew.h>                            // OpenGL Library
 #include <glm/glm.hpp>                          // OpenGL Mathematics
@@ -42,6 +41,8 @@ public:
     //constructors
     Chunk() {}
     Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords);
+    //Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
+    //~Chunk() {}
 
     //heightmap
     std::vector<glm::vec3> heightMap;
@@ -63,4 +64,7 @@ public:
     // Destructor
     ~Chunk();
 
+    //void setHeightMap(T hm) { this->hm = hm; }
+    //void setSize(size_t sz) { this->sz = sz; }
+    //void setPosition(glm::vec3 pos) { this->pos = pos; }
 };

@@ -312,6 +312,7 @@ void ViewController::updateViewMode()
 		// Notify the user in command line
 		if(this->viewMode2D)
 		{
+			// Fill the triangles to avoid seeing through the map in 2D mode
 			std::cout << "Changed view mode into 2D" << std::endl;
 		}
 		else
@@ -385,7 +386,7 @@ void ViewController::setWindowSize(const sf::Vector2u& windowSize)
  */
 int ViewController::getRenderingMode()
 {
-	if(this->fillTriangles)
+	if(this->fillTriangles || this->viewMode2D)
 	{
 		return GL_FILL;
 	}
