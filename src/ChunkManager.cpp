@@ -32,7 +32,7 @@ This is the chunk management algorithm. It takes in user position, and current c
 ChunkManager::ChunkManager(uint16_t viewDist, ColorMap* cmapPointer, po::variables_map args) : gradientNoise(args["seed"].as<uint32_t>()) {
 	m_viewDist = viewDist;
 	m_seed = args["seed"].as<uint32_t>();
-	m_chunkSize = args["size"].as<size_t>();
+	m_chunkSize = args["size"].as<size_t>()*args["resolution"].as<double>();
 	m_resolution = static_cast<float>(args["resolution"].as<double>());
 	m_cmapPointer = cmapPointer;
 
