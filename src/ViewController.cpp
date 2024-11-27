@@ -80,18 +80,18 @@ void ViewController::computeMatricesFromInputs(sf::RenderWindow& window)
 	// Update the view mode (2D or 3D)
 	this->updateViewMode();
 
+	// Time difference between current and last frame
+	float dt = (this->clock.restart()).asSeconds();
+
 	// Stuff to do in 2D mode
 	if(this->viewMode2D)
 	{
-
-
+		// Actualize the user movement and the view matrix matrix
+		this->updateMove(dt);
 	}
 	// Stuff to do in 3D mode
 	else
 	{
-		// Time difference between current and last frame
-		float dt = (this->clock.restart()).asSeconds();
-
 		// Actualize the user look angles and the projection matrix
 		this->updateLook(window);
 

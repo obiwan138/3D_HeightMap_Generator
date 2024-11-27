@@ -14,7 +14,7 @@
 # --amp-rate,               0.5                 set amplitude decay rate for fractal perlin noise
 # --mode ,                  0                   Noise mode (0 - fractal, 1 - turbulent, 2 - opalescent, 3 - gradient weighting)
 # --max,                    5                   Noise max value
-# --cmap, -c,               0                   set color map (0 - GRAY_SCALE, 1 - GIST_EARTH)
+# --cmap, -c,               1                   set color map (0 - GRAY_SCALE, 1 - GIST_EARTH)
 
 # Launch the program
-./main --size 100 --width 1280 --height 760 --octaves 8 --freq-start 0.05 --freq-rate 2 --amp-rate 0.5 --mode 0 --max 7 --cmap 1
+./main --size 100 --resolution 0.25 --width 1280 --height 760 --octaves 8 --freq-start 0.05 --freq-rate 2 --amp-rate 0.5 --mode 0 --max 7 --cmap 1

@@ -126,27 +126,6 @@ void ChunkManager::update(glm::vec3 pos){
 }
 
 
-/////////////////////////////////////////////////////////////////////
-/**
- * @author Thomas Etheve
- * @brief Initialize the buffers for the chunk
- * @param cmapPointer : Pointer to the color map
- */
-/*
-void ChunkManager::prepareToRender()
-{
-	// Loop through the chunk map
-	for (auto elementIt = this->chunkMap.begin(); elementIt != this->chunkMap.end(); elementIt++)
-	{
-		// Initialize the buffers for the current chunk
-		elementIt->second.prepareToRender(this->m_cmapPointer);
-	}
-
-	// Prepare 2d map
-	this->make2DMap();
-}
-*/
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 /**
  * @author Lydia Jameson
@@ -205,32 +184,6 @@ void ChunkManager::renderChunks(GLuint* shaderProgramPointer)
 		chunkIt->second.renderChunk(shaderProgramPointer);
 	}
 }
-
-
-/////////////////////////////////////////////////////////////////////
-/**
- * @author Thomas Etheve
- * @brief Generate the 2D map view
- * @param windowSize : The size of the window
- */
-/*
-void ChunkManager::make2DMap()
-{
-	// Create as many sprites as there are chunks
-	this->chunkSprites.clear();
-
-	// Loop through the chunk map
-	for(auto elementIt = this->chunkMap.begin(); elementIt != this->chunkMap.end(); ++elementIt)
-	{
-		// Create the sprite
-		sf::Sprite sprite;
-		sprite.setTexture(*(elementIt->second.getTexture()));
-
-		// Add the pair (coords, sprite) to the map
-		this->chunkSprites.emplace(elementIt->first, sprite);
-	}
-}
-*/
 
 /////////////////////////////////////////////////////////////////////
 /**

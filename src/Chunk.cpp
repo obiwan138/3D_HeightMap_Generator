@@ -28,9 +28,6 @@ Chunk::Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkC
 
 	this->texture2D.create(this->m_pointsPerSide, this->m_pointsPerSide);
 	this->image.create(this->m_pointsPerSide, this->m_pointsPerSide);
-
-
-	std::cout << "Made a chunk at " << chunkCoords.x * chunkSize << ", " << chunkCoords.y * chunkSize << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

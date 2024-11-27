@@ -46,8 +46,6 @@ using namespace glm;
 
 namespace po = boost::program_options;
 
-void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount);
-
 int main(int argc, char* argv[])
 {
 	/********************************************************************
@@ -61,6 +59,7 @@ int main(int argc, char* argv[])
         desc.add_options()
             ("help,h", "print help")
             ("size,s", po::value<size_t>()->default_value(100), "set N, the width of each chunk. Each chunk will be size NxN")
+			("resolution,r", po::value<double>()->default_value(0.25f), "set the plane resolution of the height map")
 			("width,x", po::value<unsigned int>()->default_value(1280), "Width of the window")
 			("height,y", po::value<unsigned int>()->default_value(720), "Height of the window")
             ("octaves,o", po::value<int>()->default_value(8), "set number of octaves for fractal perlin noise")
@@ -70,7 +69,7 @@ int main(int argc, char* argv[])
             ("amp-rate", po::value<double>()->default_value(0.5), "set amplitude decay rate for fractal perlin noise")
             ("mode, m", po::value<int>()->default_value(0), "Noise mode (0 - fractal, 1 - turbulent, 2 - opalescent, 3 - gradient weighting)")
 			("max, m", po::value<double>()->default_value(5), "Noise max value")
-			("cmap, c", po::value<unsigned int>()->default_value(0), "Color map (0 - GRAY_SCALE, 1 - GIST_EARTH)")
+			("cmap, c", po::value<unsigned int>()->default_value(1), "Color map (0 - GRAY_SCALE, 1 - GIST_EARTH)")
         ;
 
 		// Store program options
@@ -184,14 +183,10 @@ int main(int argc, char* argv[])
 	float LENGTH_Z = 15;
 	float resolution = 0.25f;
 
-	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
-	unsigned int SIZE_Z = static_cast<unsigned int>(LENGTH_Z / resolution);
+	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / arguments["resolution"].as<double>());
+	unsigned int SIZE_Z = static_cast<unsigned int>(LENGTH_Z / arguments["resolution"].as<double>());
 
-	const unsigned int NUM_STRIPS = SIZE_Z-1;
-	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
-	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
-
-	ChunkManager manager(1, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
+	ChunkManager manager(1, arguments["seed"].as<uint32_t>(), LENGTH_X, static_cast<float>(arguments["resolution"].as<double>()), &colorMap, arguments);
 
 	std::cout << "manager created" << std::endl;
 
@@ -281,8 +276,8 @@ int main(int argc, char* argv[])
 			// Set the position of the circle at the users position
 			glm::vec3 userPos = viewController.getPosition();						// Get the user position	
 			float chunkSize = static_cast<float>(arguments["size"].as<size_t>());	// Get the chunk size
-			circle.setPosition(origin.getPosition().x + userPos.x/resolution, 	// Set position from the origin (x 3D = x window)
-							   origin.getPosition().y + userPos.z/resolution);	// Set position from the origin (z 3D = y window)
+			circle.setPosition(origin.getPosition().x + userPos.x/static_cast<float>(arguments["resolution"].as<double>()), 	// Set position from the origin (x 3D = x window)
+							   origin.getPosition().y + userPos.z/static_cast<float>(arguments["resolution"].as<double>()));	// Set position from the origin (z 3D = y window)
 
 			// Draw the circle
 			window.draw(origin);
@@ -319,32 +314,5 @@ int main(int argc, char* argv[])
 	glDeleteProgram(programID);
 
 	return 0;
-}
-
-// Check the buffers
-
-void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount) {
-    // Bind VBO and read vertex data
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    std::vector<float> vertexData(vertexCount * 3); // Assuming glm::vec3 (3 floats per vertex)
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, vertexData.size() * sizeof(float), vertexData.data());
-
-    std::cout << "Vertex Buffer Object (VBO) Data:" << std::endl;
-    for (GLsizei i = 0; i < vertexCount; ++i) {
-        std::cout << "Vertex " << i << ": ("
-                  << vertexData[i * 3] << ", "
-                  << vertexData[i * 3 + 1] << ", "
-                  << vertexData[i * 3 + 2] << ")" << std::endl;
-    }
-
-    // Bind EBO and read index data
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    std::vector<GLuint> indexData(indexCount);
-    glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexData.size() * sizeof(GLuint), indexData.data());
-
-    std::cout << "Element Buffer Object (EBO) Data:" << std::endl;
-    for (GLsizei i = 0; i < indexCount; ++i) {
-        std::cout << "Index " << i << ": " << indexData[i] << std::endl;
-    }
 }
 
