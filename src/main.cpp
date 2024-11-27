@@ -46,8 +46,6 @@ using namespace glm;
 
 namespace po = boost::program_options;
 
-void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount);
-
 int main(int argc, char* argv[])
 {
 	/********************************************************************
@@ -61,6 +59,9 @@ int main(int argc, char* argv[])
         desc.add_options()
             ("help,h", "print help")
             ("size,s", po::value<size_t>()->default_value(100), "set N, the width of each chunk. Each chunk will be size NxN")
+			("resolution,r", po::value<double>()->default_value(0.25f), "set the plane resolution of the height map")
+			("width,x", po::value<unsigned int>()->default_value(1280), "Width of the window")
+			("height,y", po::value<unsigned int>()->default_value(720), "Height of the window")
             ("octaves,o", po::value<int>()->default_value(8), "set number of octaves for fractal perlin noise")
             ("seed", po::value<uint32_t>()->default_value(std::rand()), "set 64bit seed for perlin noise")
             ("freq-start", po::value<double>()->default_value(0.05), "set starting frequency for fractal perlin noise")
@@ -68,6 +69,7 @@ int main(int argc, char* argv[])
             ("amp-rate", po::value<double>()->default_value(0.5), "set amplitude decay rate for fractal perlin noise")
             ("mode, m", po::value<int>()->default_value(0), "Noise mode (0 - fractal, 1 - turbulent, 2 - opalescent, 3 - gradient weighting)")
 			("max, m", po::value<double>()->default_value(5), "Noise max value")
+			("cmap, c", po::value<unsigned int>()->default_value(1), "Color map (0 - GRAY_SCALE, 1 - GIST_EARTH)")
         ;
 
 		// Store program options
@@ -101,7 +103,10 @@ int main(int argc, char* argv[])
 	settings.minorVersion = 0;
 
 	// Window creation
-    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Fullscreen, settings);
+    sf::RenderWindow window(sf::VideoMode(arguments["width"].as<unsigned int>(), arguments["height"].as<unsigned int>()),	// Window size
+										 "2D Height Map", 														// Title of the window
+										 sf::Style::Default, 													// Default window style
+										 settings);																// OpenGL settings
 	window.setVerticalSyncEnabled(true);
 	window.setVisible(true);				// Make window visible
 	window.setActive(true); 				// Create context for OpenGL
@@ -136,7 +141,7 @@ int main(int argc, char* argv[])
 	glCullFace(GL_FRONT);  
 
 	/********************************************************************
-	 * SCENE MECHANICS
+	 * Load Shaders and MVP matrix
 	 ********************************************************************/
 
 	// SHADERS : Create and compile our GLSL program from the shaders
@@ -149,9 +154,9 @@ int main(int argc, char* argv[])
 	 * View Control
 	 ********************************************************************/
 
-	// Create the view controller object
+	// Initialize the view controller object
 	glm::vec3 position = glm::vec3(0.f, 5.f, 0.f);					// User's position
-	float horizontalAngle = 0.f; 	float verticalAngle = 0.f;	// Look angles
+	float horizontalAngle = -3.14f;	float verticalAngle = 0.f; 		// Look angles (Toward -z)
 	float speed = 5.f;				float mouseSpeed = 0.005f;		// Speed and Mouse sensitivity
 	float fov = 45.f;												// Field of view (degrees)
 	
@@ -161,26 +166,21 @@ int main(int argc, char* argv[])
 								  horizontalAngle,  verticalAngle, mouseSpeed, 
 								  fov);
 
-	// Color map
-	ColorMap colorMap(ColorMapType::GIST_EARTH);
+	// Define a mapping between the color map type index (given in argument of the program) and the actual color map type enum
+	std::map<unsigned int, ColorMapType> cmapType = {{0, ColorMapType::GRAY_SCALE}, {1, ColorMapType::GIST_EARTH}};
+
+	// Create the color map object
+	ColorMap colorMap(cmapType[arguments["cmap"].as<unsigned int>()], // ColorMap type
+						-1.f*arguments["max"].as<double>(), 		  // Minimum altitude: Centered on 0 - Max noise
+						arguments["max"].as<double>());			      // Maximum altitude: Centered on 0 + Max noise
 
 	/********************************************************************
 	 * Create hight map
 	 ********************************************************************/
 
-	// Bounds
-	float LENGTH_X = 10;
-	float LENGTH_Z = 10;
-	float resolution = 0.5f;
-
-	unsigned int SIZE_X = static_cast<unsigned int>(LENGTH_X / resolution);
-	unsigned int SIZE_Z = static_cast<unsigned int>(LENGTH_Z / resolution);
-
-	const unsigned int NUM_STRIPS = SIZE_Z-1;
-	const unsigned int NUM_TRIANGLES_PER_STRIP = (SIZE_X-1)*2;
-	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
-
-	ChunkManager manager(3, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
+	// Create the chunk manager object (View distance = 3 chunks, color map pointer, using command line arguments)
+	ChunkManager manager(3, &colorMap, arguments);
+	std::cout << "manager created" << std::endl;
 
 	/********************************************************************
 	 * Main loop
@@ -229,32 +229,76 @@ int main(int argc, char* argv[])
 	 	* Actualize the scene
 	 	********************************************************************/
 
-		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		// Use the view controller to update the view settins and matrices from user inputs
 		viewController.computeMatricesFromInputs(window);
-		
-		// Compute the Model Projection View matrix
-		glm::mat4 ProjectionMatrix = viewController.getProjectionMatrix();		// Get the projection matrix
-		glm::mat4 ViewMatrix = viewController.getViewMatrix();					// Get the view matrix
-		glm::mat4 ModelMatrix = glm::mat4(1.0f);								// Model matrix (set at origin)
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;			// Model View Projection matrix
-
-		// Send the matrices to the shader
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-        /********************************************************************
-	 	* Draw the terrain
-	 	********************************************************************/
 
 		// Change the triangles rendering mode by pressing the key P ( GL_FILL (Filled Triangles) or GL_LINE (Wireframe))
-		glPolygonMode(GL_FRONT_AND_BACK, viewController.getRenderingMode()); 
+		glPolygonMode(GL_FRONT_AND_BACK, viewController.getRenderingMode());
 
-		// Render the chunks in 3D window
-		manager.renderChunks(&programID);
+		// Compute the Model View Projection matrix
+		glm::mat4 MVP = viewController.getProjectionMatrix() 
+						* viewController.getViewMatrix() 
+						* glm::mat4(1.0f);		
 
-		// end the current frame (internally swaps the front and back buffers)
+		// Render the chunks in 3D or 2D mode
+		if(viewController.getViewMode2D())
+		{
+			// Push out the OpenGL states
+			window.pushGLStates();
+
+			// Clear the window (2D view)
+			window.clear();
+
+			// Draw the chunks as 2D maps
+			manager.drawChunks(&window);
+
+			// Create the origin as a small red square at then center of the screen
+			sf::RectangleShape origin(sf::Vector2f(5,5));						// Rectangle of 5x5 pixels
+			origin.setOrigin(2.5, 2.5);											// Origin at the center of the rectangle
+			origin.setFillColor(sf::Color::Red);								// Red fill color
+			origin.setPosition(window.getSize().x / 2, window.getSize().y / 2); // set position at the center of the window
+
+			// Create a circular shape to locate the user
+			sf::CircleShape circle(2.5f);										// Circle of 5 pixels radius
+			circle.setOrigin(2.5f, 2.5f); 										// Origin at the center of the circle
+			circle.setFillColor(sf::Color(0,0,0,0)); 							// Transparent fill
+			circle.setOutlineColor(sf::Color(255,20,147));     					// Pink border
+			circle.setOutlineThickness(2.0f);           						// Border thickness
+
+			// Set the position of the circle at the users position
+			glm::vec3 userPos = viewController.getPosition();						// Get the user position	
+			float chunkSize = static_cast<float>(arguments["size"].as<size_t>());	// Get the chunk size
+			circle.setPosition(origin.getPosition().x + userPos.x/static_cast<float>(arguments["resolution"].as<double>()), 	// Set position from the origin (x 3D = x window)
+							   origin.getPosition().y + userPos.z/static_cast<float>(arguments["resolution"].as<double>()));	// Set position from the origin (z 3D = y window)
+
+			// Draw the circle
+			window.draw(origin);
+			window.draw(circle);
+
+			// Restore the OpenGL states (bing back to the current context)
+			window.popGLStates();
+		}
+		else
+		{
+			// Use the shader program
+			glUseProgram(programID);
+
+			// Clear the screen
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+			// Send the matrix to the shader
+			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+			// Render the chunks
+			manager.renderChunks(&programID);
+
+			// Unbind Open GL states
+			glBindVertexArray(0);	// Unbind the VAO
+			glUseProgram(0);		// Unbind the shader program
+		}
+
+		// End the current frame (internally swaps the front and back buffers of the window)
         window.display();
 	}
 
@@ -262,32 +306,5 @@ int main(int argc, char* argv[])
 	glDeleteProgram(programID);
 
 	return 0;
-}
-
-// Check the buffers
-
-void printBuffer(GLuint VBO, GLuint EBO, GLsizei vertexCount, GLsizei indexCount) {
-    // Bind VBO and read vertex data
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    std::vector<float> vertexData(vertexCount * 3); // Assuming glm::vec3 (3 floats per vertex)
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, vertexData.size() * sizeof(float), vertexData.data());
-
-    std::cout << "Vertex Buffer Object (VBO) Data:" << std::endl;
-    for (GLsizei i = 0; i < vertexCount; ++i) {
-        std::cout << "Vertex " << i << ": ("
-                  << vertexData[i * 3] << ", "
-                  << vertexData[i * 3 + 1] << ", "
-                  << vertexData[i * 3 + 2] << ")" << std::endl;
-    }
-
-    // Bind EBO and read index data
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    std::vector<GLuint> indexData(indexCount);
-    glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexData.size() * sizeof(GLuint), indexData.data());
-
-    std::cout << "Element Buffer Object (EBO) Data:" << std::endl;
-    for (GLsizei i = 0; i < indexCount; ++i) {
-        std::cout << "Index " << i << ": " << indexData[i] << std::endl;
-    }
 }
 

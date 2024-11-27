@@ -57,7 +57,8 @@ private:
     std::queue<std::pair<int, int>> deletionQueue;
 
     // 2D map view
-    std::vector<sf::Sprite> chunkSprites;
+    std::map<std::pair<int, int>, sf::Sprite> chunkSprites;
+
 
     GradientNoise gradientNoise;
 public:
@@ -67,12 +68,14 @@ public:
 
     void update(glm::vec3 pos);
 
-    // Init the buffers
-    void prepareToRender(ColorMap* cmapPointer);
+    // Init the buffers at first time
+    //void prepareToRender();
 
     // Render chunks
     void renderChunks(GLuint* shaderProgramPointer);
 
+    // Construct the initial 2D map view
+    //void make2DMap();
     //fill in a chunk's height values
     void populateChunk(std::pair<int, int> currentPair);
 
@@ -82,7 +85,7 @@ public:
     // Draw 2D map view
     //void view2DMap();
 
-    // Return the edges of the chunkmap
-    //Edge2D getEdges();
+    // Draw the 2D map view
+    void drawChunks(sf::RenderWindow* window);
 };
 

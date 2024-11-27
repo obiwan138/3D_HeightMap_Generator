@@ -25,6 +25,9 @@ Chunk::Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkC
 	m_pointsPerSide = static_cast<unsigned int>(m_chunkSize / m_resolution);
 
 	heightMap = std::vector<glm::vec3>(m_pointsPerSide * m_pointsPerSide, glm::vec3(0, 0, 0));
+
+	this->texture2D.create(this->m_pointsPerSide, this->m_pointsPerSide);
+	this->image.create(this->m_pointsPerSide, this->m_pointsPerSide);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -110,27 +113,26 @@ void Chunk::prepareToRender(ColorMap* cmapPointer)
 	* 2. 2D RENDERING STUFF (Chunk texture)
 	*/
 
-	// Init the texture
-	this->texture2D.create(this->m_pointsPerSide-1, this->m_pointsPerSide-1);
-
-	// Create an image from corresponding to colors vector
-	sf::Image image;
-	image.create(this->m_pointsPerSide-1, this->m_pointsPerSide-1);
-
-	// Go over the pixels and set the color
-	for(unsigned int i = 0; i < this->m_pointsPerSide-1; i++)
+	// Go over the pixels and compute the color of the image
+	for(unsigned int i = 0; i < this->m_pointsPerSide; i++)		// Rows - x axis
 	{
-		for(unsigned int j = 0; j < this->m_pointsPerSide-1; j++)
+		for(unsigned int j = 0; j < this->m_pointsPerSide; j++)	// Columns - z axis
 		{
 			// Get the color for the current pixel from the 1D color vector
-			glm::vec3 color = colors[i * (this->m_pointsPerSide-1) + j];
-			// Set the pixel color
-			image.setPixel(j, i, sf::Color(color.x * 255, color.y * 255, color.z * 255));
+			glm::vec3 color = colors[i * this->m_pointsPerSide + j];
+			// Set the pixel color (i=x, j =z)
+			if(i==0 || j==0 || i==this->m_pointsPerSide-1 || j==this->m_pointsPerSide-1)
+			{
+				image.setPixel(i, j, sf::Color::Black);
+			}
+			else{
+				image.setPixel(i, j, sf::Color(color.x * 255, color.y * 255, color.z * 255));
+			}
 		}
 	}
 
-	// Update the texture
-	this->texture2D.update(image);
+	// Update the texture with the computed image
+	this->texture2D.update(this->image);
 
 	m_preparedToRender = true;
 }
