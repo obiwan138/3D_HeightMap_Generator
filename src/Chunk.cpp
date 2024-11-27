@@ -124,7 +124,13 @@ void Chunk::prepareToRender(ColorMap* cmapPointer)
 			// Get the color for the current pixel from the 1D color vector
 			glm::vec3 color = colors[i * this->m_pointsPerSide + j];
 			// Set the pixel color (i=x, j =z)
-			image.setPixel(i, j, sf::Color(color.x * 255, color.y * 255, color.z * 255));
+			if(i==0 || j==0 || i==this->m_pointsPerSide-1 || j==this->m_pointsPerSide-1)
+			{
+				image.setPixel(i, j, sf::Color::Black);
+			}
+			else{
+				image.setPixel(i, j, sf::Color(color.x * 255, color.y * 255, color.z * 255));
+			}
 		}
 	}
 

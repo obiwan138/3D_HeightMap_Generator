@@ -75,6 +75,8 @@ class ViewController
                         const float horizontalAngle,  const float verticalAngle, const float mouseSpeed, 
                         const float fov_deg);
 
+        /////////////////// Methods for view control //////////////////////
+
         // Actualize the matrices from the user inputs
         void computeMatricesFromInputs(sf::RenderWindow& window);
 
@@ -109,6 +111,7 @@ class ViewController
 
         // Get the the 2D view mode
         bool getViewMode2D();
+
         //get the camera's position
         glm::vec3 getPosition();
 

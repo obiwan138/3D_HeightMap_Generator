@@ -61,6 +61,8 @@ int main(int argc, char* argv[])
         desc.add_options()
             ("help,h", "print help")
             ("size,s", po::value<size_t>()->default_value(100), "set N, the width of each chunk. Each chunk will be size NxN")
+			("width,x", po::value<unsigned int>()->default_value(1280), "Width of the window")
+			("height,y", po::value<unsigned int>()->default_value(720), "Height of the window")
             ("octaves,o", po::value<int>()->default_value(8), "set number of octaves for fractal perlin noise")
             ("seed", po::value<uint32_t>()->default_value(std::rand()), "set 64bit seed for perlin noise")
             ("freq-start", po::value<double>()->default_value(0.05), "set starting frequency for fractal perlin noise")
@@ -68,6 +70,7 @@ int main(int argc, char* argv[])
             ("amp-rate", po::value<double>()->default_value(0.5), "set amplitude decay rate for fractal perlin noise")
             ("mode, m", po::value<int>()->default_value(0), "Noise mode (0 - fractal, 1 - turbulent, 2 - opalescent, 3 - gradient weighting)")
 			("max, m", po::value<double>()->default_value(5), "Noise max value")
+			("cmap, c", po::value<unsigned int>()->default_value(0), "Color map (0 - GRAY_SCALE, 1 - GIST_EARTH)")
         ;
 
 		// Store program options
@@ -101,7 +104,10 @@ int main(int argc, char* argv[])
 	settings.minorVersion = 0;
 
 	// Window creation
-    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(arguments["width"].as<unsigned int>(), arguments["height"].as<unsigned int>()),	// Window size
+										 "2D Height Map", 														// Title of the window
+										 sf::Style::Default, 													// Default window style
+										 settings);																// OpenGL settings
 	window.setVerticalSyncEnabled(true);
 	window.setVisible(true);				// Make window visible
 	window.setActive(true); 				// Create context for OpenGL
@@ -136,7 +142,7 @@ int main(int argc, char* argv[])
 	glCullFace(GL_FRONT);  
 
 	/********************************************************************
-	 * SCENE MECHANICS
+	 * Load Shaders and MVP matrix
 	 ********************************************************************/
 
 	// SHADERS : Create and compile our GLSL program from the shaders
@@ -149,9 +155,9 @@ int main(int argc, char* argv[])
 	 * View Control
 	 ********************************************************************/
 
-	// Create the view controller object
+	// Initialize the view controller object
 	glm::vec3 position = glm::vec3(0.f, 5.f, 0.f);					// User's position
-	float horizontalAngle = -3.14f;	float verticalAngle = 0.f;  // Look angles (Toward -z)
+	float horizontalAngle = -3.14f;	float verticalAngle = 0.f; 		// Look angles (Toward -z)
 	float speed = 5.f;				float mouseSpeed = 0.005f;		// Speed and Mouse sensitivity
 	float fov = 45.f;												// Field of view (degrees)
 	
@@ -161,8 +167,13 @@ int main(int argc, char* argv[])
 								  horizontalAngle,  verticalAngle, mouseSpeed, 
 								  fov);
 
-	// Color map
-	ColorMap colorMap(ColorMapType::GIST_EARTH, -1.f*arguments["max"].as<double>(), arguments["max"].as<double>());
+	// Define a mapping between the color map type index (given in argument of the program) and the actual color map type enum
+	std::map<unsigned int, ColorMapType> cmapType = {{0, ColorMapType::GRAY_SCALE}, {1, ColorMapType::GIST_EARTH}};
+
+	// Create the color map object
+	ColorMap colorMap(cmapType[arguments["cmap"].as<unsigned int>()], // ColorMap type
+						-1.f*arguments["max"].as<double>(), 		  // Minimum altitude: Centered on 0 - Max noise
+						arguments["max"].as<double>());			      // Maximum altitude: Centered on 0 + Max noise
 
 	/********************************************************************
 	 * Create hight map
@@ -253,7 +264,30 @@ int main(int argc, char* argv[])
 
 			// Draw the chunks as 2D maps
 			manager.drawChunks(&window);
-        	
+
+			// Create the origin as a small red square at then center of the screen
+			sf::RectangleShape origin(sf::Vector2f(5,5));						// Rectangle of 5x5 pixels
+			origin.setOrigin(2.5, 2.5);											// Origin at the center of the rectangle
+			origin.setFillColor(sf::Color::Red);								// Red fill color
+			origin.setPosition(window.getSize().x / 2, window.getSize().y / 2); // set position at the center of the window
+
+			// Create a circular shape to locate the user
+			sf::CircleShape circle(2.5f);										// Circle of 5 pixels radius
+			circle.setOrigin(2.5f, 2.5f); 										// Origin at the center of the circle
+			circle.setFillColor(sf::Color(0,0,0,0)); 							// Transparent fill
+			circle.setOutlineColor(sf::Color(255,20,147));     					// Pink border
+			circle.setOutlineThickness(2.0f);           						// Border thickness
+
+			// Set the position of the circle at the users position
+			glm::vec3 userPos = viewController.getPosition();						// Get the user position	
+			float chunkSize = static_cast<float>(arguments["size"].as<size_t>());	// Get the chunk size
+			circle.setPosition(origin.getPosition().x + userPos.x/resolution, 	// Set position from the origin (x 3D = x window)
+							   origin.getPosition().y + userPos.z/resolution);	// Set position from the origin (z 3D = y window)
+
+			// Draw the circle
+			window.draw(origin);
+			window.draw(circle);
+
 			// Restore the OpenGL states (bing back to the current context)
 			window.popGLStates();
 		}

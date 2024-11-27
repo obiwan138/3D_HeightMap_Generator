@@ -429,6 +429,13 @@ glm::mat4 ViewController::getViewMatrix()
 	return ViewMatrix;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @author Lydia Jameson
+ * @brief Get the user's position
+ * @return glm::vec3
+ */
 glm::vec3 ViewController::getPosition()
 {
 	return position;

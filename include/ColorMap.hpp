@@ -1,10 +1,10 @@
 /*
 Author: Thomas Etheve
 Class: ECE6122
-Last Date Modified: 10/26/2024
+Last Date Modified: 11/27/2024
 
 Description:
-This is the main loop for this program. It loads in all of the objects, runs the draw loop, and updates the view based on user inputs.
+This file is the header file of the ColorMap class. It contains the methods to construct the class, and color the vertices of the terrain.
 */
 
 #pragma once
@@ -16,24 +16,35 @@ using namespace glm;
 
 #include <vector>
 
+/**
+ * @author Thomas Etheve
+ * @enum ColorMapType
+ * @brief Enumerate the different colormap types
+ */
 enum class ColorMapType
 {
-    GIST_EARTH,
-    MONOCHROME_LEVELS,
+    GIST_EARTH,     // Imitates the colors used to represent altitude on Geographical maps
+    GRAY_SCALE,     // Gray scale colors
 };
 
-#define SEA_LEVEL 0.3f          // 0.5f * minAlt, which is already negative
-#define MAX_LAND 0.1f
-#define MAX_MOUNTAIN 0.3f
-#define MAX_ALT 0.6f
+// Constants (as ratio of min and max altitudes)
+#define SEA_LEVEL 0.3f        // multiplies minAlt, which is currently negative
+#define MAX_LAND 0.1f         // multiplies maxAlt
+#define MAX_MOUNTAIN 0.3f     // multiplies maxAlt
+#define MAX_ALT 0.6f          // multiplies maxAlt
 
+/**
+ * @author Thomas Etheve
+ * @class ColorMap
+ * @brief This class is used to color the vertices of the terrain according to their altitude
+ */
 class ColorMap
 {
     private:
         // Color map type
         ColorMapType type;
-        glm::vec3 MonochromeColor;
 
+        // Minimum and maximum value for color scale
         float minAlt;
         float maxAlt;
 
@@ -44,14 +55,11 @@ class ColorMap
         // Constructor
         ColorMap(ColorMapType type, float minAlt, float maxAlt);
 
-        // Change the colormap type
-        void changeType(ColorMapType type);
-
         // Get the color vector corresponding to the vertices vector
         std::vector<glm::vec3> getColorVector(const std::vector<glm::vec3>& vertices);
 
         // Get the color vector corresponding to monorchrome levels
-        void getMonochromeLevels(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors);
+        void getGrayScale(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors);
 
         // Get the color vector corresponding to monorchrome levels
         void getEarthLevels(const std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors);
