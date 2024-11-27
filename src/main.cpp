@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 	settings.minorVersion = 0;
 
 	// Window creation
-    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(1280, 760), "2D Height Map", sf::Style::Fullscreen, settings);
 	window.setVerticalSyncEnabled(true);
 	window.setVisible(true);				// Make window visible
 	window.setActive(true); 				// Create context for OpenGL
@@ -181,7 +181,6 @@ int main(int argc, char* argv[])
 	const unsigned int NUM_VERTS_PER_STRIP = SIZE_X*2;
 
 	ChunkManager manager(3, arguments["seed"].as<uint32_t>(), LENGTH_X, resolution, &colorMap, arguments);
-	std::cout << "manager created" << std::endl;
 
 	/********************************************************************
 	 * Main loop
