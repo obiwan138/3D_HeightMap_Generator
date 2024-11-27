@@ -62,28 +62,20 @@ private:
 
     GradientNoise gradientNoise;
 public:
-    ChunkManager(uint16_t viewDist, int64_t seed, float chunkSize, float resolution, ColorMap* cmapPointer, po::variables_map args);
+    ChunkManager(uint16_t viewDist, ColorMap* cmapPointer, po::variables_map args);
 
     std::map<std::pair<int, int>, Chunk> chunkMap;
 
     void update(glm::vec3 pos);
 
-    // Init the buffers at first time
-    //void prepareToRender();
-
     // Render chunks
     void renderChunks(GLuint* shaderProgramPointer);
 
-    // Construct the initial 2D map view
-    //void make2DMap();
     //fill in a chunk's height values
     void populateChunk(std::pair<int, int> currentPair);
 
     // Destructor
     ~ChunkManager();
-
-    // Draw 2D map view
-    //void view2DMap();
 
     // Draw the 2D map view
     void drawChunks(sf::RenderWindow* window);
