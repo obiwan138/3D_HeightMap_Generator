@@ -29,7 +29,7 @@ This is the chunk management algorithm. It takes in user position, and current c
  * @author Lydia Jameson
  * @brief Constructor
  */
-ChunkManager::ChunkManager(uint16_t viewDist, ColorMap* cmapPointer, po::variables_map args) : gradientNoise(seed) {
+ChunkManager::ChunkManager(uint16_t viewDist, ColorMap* cmapPointer, po::variables_map args) : gradientNoise(args["seed"].as<uint32_t>()) {
 	m_viewDist = viewDist;
 	m_seed = args["seed"].as<uint32_t>();
 	m_chunkSize = args["size"].as<size_t>();
@@ -148,6 +148,7 @@ void ChunkManager::populateChunk(std::pair<int, int> currentPair) {
 
 	// Add the 3D chunk to the chunk map
 	chunkMap.emplace(currentPair, tempChunk);
+	std::cout << "Chunk added at " << currentPair.first << ", " << currentPair.second << std::endl;
 
 	lck.unlock();
 }
