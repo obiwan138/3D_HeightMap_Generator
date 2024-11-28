@@ -62,7 +62,7 @@ private:
 
     GradientNoise gradientNoise;
 public:
-    ChunkManager(uint16_t viewDist, ColorMap* cmapPointer, po::variables_map args);
+    ChunkManager(ColorMap* cmapPointer, po::variables_map args);
 
     std::map<std::pair<int, int>, Chunk> chunkMap;
 

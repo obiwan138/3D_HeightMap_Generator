@@ -60,6 +60,7 @@ int main(int argc, char* argv[])
             ("help,h", "print help")
             ("size,s", po::value<size_t>()->default_value(100), "set N, the width of each chunk. Each chunk will be size NxN")
 			("resolution,r", po::value<double>()->default_value(0.25), "set the plane resolution of the height map")
+			("visibility,v", po::value<unsigned int>()->default_value(1), "set the number of chunks visible in each direction")
 			("width,x", po::value<unsigned int>()->default_value(1280), "Width of the window")
 			("height,y", po::value<unsigned int>()->default_value(720), "Height of the window")
             ("octaves,o", po::value<int>()->default_value(8), "set number of octaves for fractal perlin noise")
@@ -179,7 +180,7 @@ int main(int argc, char* argv[])
 	 ********************************************************************/
 
 	// Create the chunk manager object (View distance = 3 chunks, color map pointer, using command line arguments)
-	ChunkManager manager(3, &colorMap, arguments);
+	ChunkManager manager(&colorMap, arguments);
 	std::cout << "manager created" << std::endl;
 
 	/********************************************************************

@@ -29,8 +29,8 @@ This is the chunk management algorithm. It takes in user position, and current c
  * @author Lydia Jameson
  * @brief Constructor
  */
-ChunkManager::ChunkManager(uint16_t viewDist, ColorMap* cmapPointer, po::variables_map args) : gradientNoise(args["seed"].as<uint32_t>()) {
-	m_viewDist = viewDist;
+ChunkManager::ChunkManager(ColorMap* cmapPointer, po::variables_map args) : gradientNoise(args["seed"].as<uint32_t>()) {
+	m_viewDist = args["visibility"].as<unsigned int>();
 	m_seed = args["seed"].as<uint32_t>();
 	m_chunkSize = args["size"].as<size_t>()*args["resolution"].as<double>();
 	m_resolution = static_cast<float>(args["resolution"].as<double>());
