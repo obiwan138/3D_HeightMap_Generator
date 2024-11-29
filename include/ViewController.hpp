@@ -1,7 +1,7 @@
 /*
 Author: Thomas Etheve
 Class: ECE6122
-Last Date Modified: 10/26/2024
+Last Date Modified: 11/29/2024
 
 Description:
 
@@ -41,7 +41,8 @@ class ViewController
         sf::Vector2u windowSize;        // Window size
         bool fillTriangles;             // Fill triangles flag
         bool fKeyPressed;               // F key pressed flag (to avoid multiple toggles on triangle flag)
-        bool view2D;                    // 2D map view flag
+        bool viewMode2D;                // 2D map view flag
+        bool vKeyPressed;               // V key pressed flag (to avoid multiple toggles on view mode flag)
 
         // Point of view variables
         glm::vec3 position;             // User's position in cartesian cooedinates [m, m, m]
@@ -74,6 +75,8 @@ class ViewController
                         const float horizontalAngle,  const float verticalAngle, const float mouseSpeed, 
                         const float fov_deg);
 
+        /////////////////// Methods for view control //////////////////////
+
         // Actualize the matrices from the user inputs
         void computeMatricesFromInputs(sf::RenderWindow& window);
 
@@ -86,8 +89,8 @@ class ViewController
         // Update the triangle rendering mode
         void updateTriangleRendering();
 
-        // Set the 2D map view
-        void view2DMap(sf::RenderWindow* window, const Edge2D& edges);
+        // Update view mode
+        void updateViewMode();
 
         /////////////////// Getters & setters //////////////////////
 
@@ -105,6 +108,9 @@ class ViewController
 
         // Get the rendering mode
         int getRenderingMode();
+
+        // Get the the 2D view mode
+        bool getViewMode2D();
 
         //get the camera's position
         glm::vec3 getPosition();

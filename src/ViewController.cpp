@@ -1,7 +1,7 @@
 /*
 Author: Thomas Etheve
 Class: ECE6122
-Last Date Modified: 11/03/2024
+Last Date Modified: 11/29/2024
 
 Description:
 
@@ -34,7 +34,8 @@ ViewController::ViewController(const sf::Vector2u& windowSize,
 	this->windowSize = windowSize;	 // Window size
 	this->fillTriangles = false;	 // Wiremesh : do not fill triangles at first
 	this->fKeyPressed = false;		 // F key not pressed at first
-	this->view2D = false;			 // 3D view at first
+	this->viewMode2D = false;		 // 2D view at first
+	this->vKeyPressed = false; // Right Shift key not pressed at first
 
 	// Define the initial coordinates
 	this->position = position;					// Initial position
@@ -75,18 +76,31 @@ ViewController::ViewController(const sf::Vector2u& windowSize,
  * @brief Compute the view and the projection matrices from the user input
  */
 void ViewController::computeMatricesFromInputs(sf::RenderWindow& window)
-{
+{	
+	// Update the view mode (2D or 3D)
+	this->updateViewMode();
+
 	// Time difference between current and last frame
 	float dt = (this->clock.restart()).asSeconds();
 
-	// Actualize the user look angles and the projection matrix
-	this->updateLook(window);
+	// Stuff to do in 2D mode
+	if(this->viewMode2D)
+	{
+		// Actualize the user movement and the view matrix matrix
+		this->updateMove(dt);
+	}
+	// Stuff to do in 3D mode
+	else
+	{
+		// Actualize the user look angles and the projection matrix
+		this->updateLook(window);
 
-	// Actualize the user movement and the view matrix matrix
-	this->updateMove(dt);
+		// Actualize the user movement and the view matrix matrix
+		this->updateMove(dt);
 
-	// Actualize the triangle rendering mode
-	this->updateTriangleRendering();
+		// Actualize the triangle rendering mode
+		this->updateTriangleRendering();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,6 +122,16 @@ void ViewController::updateLook(sf::RenderWindow& window)
 	// Compute new orientation
 	this->horizontalAngle += this->mouseSpeed * float(this->windowSize.x/2 - mousePosX );
 	this->verticalAngle   += this->mouseSpeed * float(this->windowSize.y/2 - mousePosY );
+
+	// Set bounds to the vertical angle [-pi/2, pi/2] to avoid flipping
+	if(this->verticalAngle > 3.14f/2)
+	{
+		this->verticalAngle = 3.14f/2;
+	}
+	else if(this->verticalAngle < -3.14f/2)
+	{
+		this->verticalAngle = -3.14f/2;
+	}
 
 	// Increase FOV
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) //(glfwGetKey( window3D, GLFW_KEY_UP ) == GLFW_PRESS)
@@ -137,6 +161,12 @@ void ViewController::updateLook(sf::RenderWindow& window)
 		this->orthographicProjection = true;
 		// Set the perspective projection flag off
 		this->perspectiveProjection = false;
+
+		// Notify the user in command line
+		if(this->orthographicProjection)
+		{
+			std::cout << "Changed projection type into ORTHOGRAPHIC" << std::endl;
+		}
 	}
 
 	// If P is presses, switch to perspective projection
@@ -146,6 +176,12 @@ void ViewController::updateLook(sf::RenderWindow& window)
 		this->orthographicProjection = false;
 		// Set the perspective projection flag on
 		this->perspectiveProjection = true;
+
+		// Notify the user in command line
+		if(this->perspectiveProjection)
+		{
+			std::cout << "Changed projection type into PERSPECTIVE" << std::endl;
+		}
 	}
 
 	// If R is pressed, reset position and look angles
@@ -266,7 +302,38 @@ void ViewController::updateMove(float dt)
 ///////////////////////////////////////////////////////////////////////////////
 /**
  * @author Thomas Etheve
- * @brief Update the triangle rendering mode according to the user inputs
+ * @brief Toggle the view mode according to the user inputs
+ */
+void ViewController::updateViewMode()
+{
+	// Check if Right Shift key is pressed and wasn't pressed before
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::V) && !this->vKeyPressed)
+	{
+		// Toggle the view mode
+		this->viewMode2D = !(this->viewMode2D);
+		this->vKeyPressed = true;
+
+		// Notify the user in command line
+		if(this->viewMode2D)
+		{
+			// Fill the triangles to avoid seeing through the map in 2D mode
+			std::cout << "Changed view mode into 2D" << std::endl;
+		}
+		else
+		{
+			std::cout << "Changed view mode into 3D" << std::endl;
+		}
+	}
+	// Check if Right Shift key is released to reset the flag
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::V) && this->vKeyPressed)
+	{
+		this->vKeyPressed = false; // Reset flag to allow toggling on the next press
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @author Thomas Etheve
+ * @brief Toggle the triangle rendering mode according to the user inputs
  */
 void ViewController::updateTriangleRendering()
 {
@@ -275,57 +342,22 @@ void ViewController::updateTriangleRendering()
     {
         this->fillTriangles = !this->fillTriangles; // Toggle the state
         this->fKeyPressed = true;  // Set flag to prevent multiple toggles during a press
+
+		// Notify the user in command line
+		if(this->fillTriangles)
+		{
+			std::cout << "Changed triangle rendering into FILL" << std::endl;
+		}
+		else
+		{
+			std::cout << "Changed triangle rendering into WIRE MESH" << std::endl;
+		}
     }
     // Check if F key is released to reset the flag
     else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::F) && this->fKeyPressed)
     {
         this->fKeyPressed = false; // Reset flag to allow toggling on the next press
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ViewController::view2DMap(sf::RenderWindow* window, const Edge2D& edge)
-{
-	// Reset position and look down
-	this->position = glm::vec3(0, 200.f, 0);
-
-	// Look down
-	this->horizontalAngle = 0.f;
-	this->verticalAngle = -3.14f/2;
-
-	// Update the view matrix
-	this->ViewMatrix = glm::lookAt(				// Set up the camera matrix
-							this->position,  			// Camera is here
-							glm::vec3(0,0,0),           // and looks here : origin
-							glm::vec3(0,1,0)            // Head is up (set to 0,-1,0 to look upside-down)
-						);
-	
-	// Change the projection mode to orthographic
-	this->orthographicProjection = true;
-	this->perspectiveProjection = false;
-
-	// Set the 2D view flag
-	this->view2D = true;
-	this->fillTriangles = true;
-
-	// Resize the window
-	double width = fabs(edge.right - edge.left);
-	double height = fabs(edge.top - edge.bottom);
-	float dimMax = std::max(width, height);
-	float ratioX = width / dimMax;
-	float ratioY = height / dimMax;
-
-	unsigned int windowWidth = static_cast<unsigned int>(ratioX * 800);
-	unsigned int windowHeight = static_cast<unsigned int>(ratioY * 800);
-	std::cout << "windowWidth: " << windowWidth << " windowHeight: " << windowHeight << std::endl;
-	std::cout << "edge.left: " << edge.left << " edge.right: " << edge.right << " edge.top: " << edge.top << " edge.bottom: " << edge.bottom << std::endl;
-	window->setSize(sf::Vector2u(windowWidth, windowHeight));
-
-	// Set the orthographic projection matrix
-	this->ProjectionMatrix = glm::ortho(edge.left, edge.right, 			// Left and right bounds
-										edge.bottom+15, edge.top-15, 			// Bottom and top bounds
-										this->nearPlane, this->farPlane);   // Near and far planes bounds
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -358,7 +390,7 @@ void ViewController::setWindowSize(const sf::Vector2u& windowSize)
  */
 int ViewController::getRenderingMode()
 {
-	if(this->fillTriangles)
+	if(this->fillTriangles || this->viewMode2D)
 	{
 		return GL_FILL;
 	}
@@ -366,6 +398,17 @@ int ViewController::getRenderingMode()
 	{
 		return GL_LINE;
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @author Thomas Etheve
+ * @brief Get the 2D view mode
+ * @return bool
+ */
+bool ViewController::getViewMode2D()
+{
+	return this->viewMode2D;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -390,6 +433,13 @@ glm::mat4 ViewController::getViewMatrix()
 	return ViewMatrix;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @author Lydia Jameson
+ * @brief Get the user's position
+ * @return glm::vec3
+ */
 glm::vec3 ViewController::getPosition()
 {
 	return position;
