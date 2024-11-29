@@ -1,7 +1,9 @@
 #version 330 core
 
+// Output
 out vec4 FragColor;     // Color of the fragment
 
+// Input
 in vec3 color;          // Color computed from the Vertex shader
 
 

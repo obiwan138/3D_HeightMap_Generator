@@ -1,17 +1,18 @@
 /*
 Author: Lydia Jameson
 Class: ECE6122
-Last Date Modified: 11/16/2024
+Last Date Modified: 11/28/2024
 
 Description:
-header for chunkManager
+Chunk Manager class header file. This contains the declaration for the ChunkManager class. The Chunk Manager handles how chunks are created,
+deleted, and rendered. It also handles the 2D map view.
 */
 
 #pragma once
 
 // Standard libraries
-#include <map>                    // Used for chunk map
-#include <vector>                 // Used to store vertices
+#include <map>                    
+#include <vector>                 
 #include <thread>
 #include <mutex>
 #include <queue>
@@ -33,51 +34,59 @@ header for chunkManager
 
 namespace po = boost::program_options;
 
-struct Edge2D {
-    float left;
-    float right;
-    float top;
-    float bottom;
-};
-
+/**
+ * @class ChunkManager
+ */
 class ChunkManager {
-private:
-    std::mutex m_mut;
-    glm::vec3 m_pos;
-    glm::vec3 m_prevPos;
-    glm::vec3 m_center;
-    float m_chunkSize;
-    float m_resolution;
-    int16_t m_viewDist;
-    int64_t m_seed;
-    ColorMap* m_cmapPointer;
-    po::variables_map m_args;
 
-    std::vector<std::thread> threadVector;
-    std::queue<std::pair<int, int>> deletionQueue;
+    private:
 
-    // 2D map view
-    std::map<std::pair<int, int>, sf::Sprite> chunkSprites;
+        ///////////////////////////// MEMBER VARIABLES /////////////////////////////       
+        glm::vec3 m_pos;            // Player's position
+        glm::vec3 m_prevPos;        // Player's previous position
+        glm::vec3 m_center;         // Center of the chunk map
+        float m_chunkSize;          // Size of a chunk (in meters)
+        float m_resolution;         // Resolution of the chunks (in meters)
+        int16_t m_viewDist;         // View distance (in chunks) from the user's position
+        int64_t m_seed;             // Seed for the Perlin noise
 
+        // External objects
+        GradientNoise gradientNoise;    // Perlin noise generator
+        ColorMap* m_cmapPointer;        // Pointer to the color map object
+        po::variables_map m_args;       // Command line arguments used by the noise generator
 
-    GradientNoise gradientNoise;
-public:
-    ChunkManager(ColorMap* cmapPointer, po::variables_map args);
+        // Multithreading
+        std::vector<std::thread> threadVector;          // Vector of threads that will be used to populate chunks
+        std::queue<std::pair<int, int>> deletionQueue;  // Queue of chunks that need to be deleted
+        std::mutex m_mut;                               // Mutex for the deletion queue
 
-    std::map<std::pair<int, int>, Chunk> chunkMap;
+        // 2D map view : map of chunk sprites with 2D grid locations (x, z) counted in chunks
+        std::map<std::pair<int, int>, sf::Sprite> chunkSprites;
 
-    void update(glm::vec3 pos);
+        
+    public:
 
-    // Render chunks
-    void renderChunks(GLuint* shaderProgramPointer);
+        // Map of chunks : each loaded chunk is stored and mapped to a 2D grid location (x, z) counted in chunks
+        std::map<std::pair<int, int>, Chunk> chunkMap;
 
-    //fill in a chunk's height values
-    void populateChunk(std::pair<int, int> currentPair);
+        ///////////////////////////// MEMBER FUNCTIONS /////////////////////////////
 
-    // Destructor
-    ~ChunkManager();
+        // Constructor
+        ChunkManager(ColorMap* cmapPointer, po::variables_map args);
 
-    // Draw the 2D map view
-    void drawChunks(sf::RenderWindow* window);
+        // Update the chunk map based on the player's position (creation and deletion of chunks)
+        void update(glm::vec3 pos);
+
+        // Fill in a chunk's height values
+        void populateChunk(std::pair<int, int> currentPair);
+
+        // Render chunks in 3D
+        void renderChunks(GLuint* shaderProgramPointer);
+
+        // Draw the 2D map view
+        void drawChunks(sf::RenderWindow* window);
+
+        // Destructor
+        ~ChunkManager();
 };
 

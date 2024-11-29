@@ -1,10 +1,13 @@
 /*
 Author: Thomas Etheve
 Class: ECE6122
-Last Date Modified: 10/26/2024
+Last Date Modified: 11/28/2024
 
 Description:
-This is the main loop for this program. It loads in all of the objects, runs the draw loop, and updates the view based on user inputs.
+This is the main loop for this program. It intiates the chunk manager to draw/render and manage chunks of the heigth map in 3D or 2D mode. 
+Also, a view controller allows the user to move around the map and change the rendering mode. This program has several arguments. Use the 
+shell scripts to run the program with the desired arguments.
+
 */
 
 // Include libraries
@@ -22,28 +25,29 @@ This is the main loop for this program. It loads in all of the objects, runs the
 #include <omp.h>
 
 // Include GLEW
-#include <GL/glew.h>
-
-// Include GLM
-#include <glm/glm.hpp>
+#include <GL/glew.h>						// Init Open GL states
+#include <glm/glm.hpp>						// Open GL Math library
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
 // Include SFML
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
+#include <SFML/Graphics.hpp>				// SFML 2D rendering
+#include <SFML/Window.hpp>					// SFML Window creation and management
+#include <SFML/OpenGL.hpp>					// SFML OpenGL integration
 
 // Include boost
-#include <boost/program_options.hpp>
+#include <boost/program_options.hpp>		// Command line arguments parsing
 
 // Include project header files
-#include <common/shader.hpp>
+#include <common/shader.hpp>				// Load Shaders
+
+// Include project classes
 #include "ChunkManager.hpp"
 #include "ViewController.hpp"
 #include "ColorMap.hpp"
 #include "Chunk.hpp"
 
+// Program option namespace
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
@@ -77,11 +81,14 @@ int main(int argc, char* argv[])
         po::store(po::parse_command_line(argc, argv, desc), arguments);
         po::notify(arguments);
 
+		// Print help message if --help is passed
         if (arguments.count("help")) {
             std::cout << desc << "\n";
             return 0;
         }
     }
+
+	// Check the command line arguments are valid
     catch(std::exception& e) {
 		// Handle known exceptions
         std::cerr << "error: " << e.what() << "\n";
@@ -91,8 +98,9 @@ int main(int argc, char* argv[])
 		// Handle unknown exceptions
         std::cerr << "Exception of unknown type!\n";
     }
+
 	/********************************************************************
-	 * Initialize the SFML Window
+	 * Initialize the SFML Window with OPENGL settings
 	 ********************************************************************/
 
 	// Create the window with OpenGL settings

@@ -2,15 +2,17 @@
 layout (location = 0) in vec3 vertexPosition_modelspace;	// Vertex position buffer 
 layout (location = 1) in vec3 vertexColor;					// Vertex color buffer
 
+// Output
 out vec3 color; 	// specify a color output to the fragment shader
 
-uniform mat4 MVP;
+// Input
+uniform mat4 MVP;	// Model View Projection matrix
 
 void main()
 {	
 	// Output position of the vertex, in clip space : MVP * position
 	gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
 
-	// Set the outpur color to the vertex color
+	// Set the output color to the vertex color
 	color = vertexColor;
 }

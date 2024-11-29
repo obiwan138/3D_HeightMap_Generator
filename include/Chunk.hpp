@@ -1,70 +1,94 @@
 /*
 Author: Matthew Luyten
-Class: ECE4122
-Last Date Modified: 10/26/2024
+Class: ECE6122
+Last Date Modified: 11/29/2024
 
-Description:
-This is the header for the Chunk class. This class manages an NxN chunk of heightmap.
+Description: This is the header file for the Chunk class. This class manages an NxN chunk of vertices and colors for rendering.
+The (x,z) coordinates give the location of the point in 2D while the y coordinate gives the height of the point.
+
 */
 
 #pragma once
 
+// Standard libraries
 #include <vector>
 
+// OpenGL libraries
 #include <GL/glew.h>                            // OpenGL Library
 #include <glm/glm.hpp>                          // OpenGL Mathematics
 #include <glm/gtc/matrix_transform.hpp>         // Transformation matrices
 
+// SFML libraries
 #include <SFML/Graphics.hpp>                    // Simple and Fast Multimedia Library
 #include <SFML/Window.hpp>                      // Windowing library
 
+// Custom libraries
 #include "ColorMap.hpp"                         // Init the color buffer
 
+/**
+ * @class Chunk
+ * @brief describe a NxN chunk of vertices and colors for rendering
+ */
 class Chunk {
-private:
-    double m_chunkSize;
-    double m_resolution; //distance between points
-    unsigned int m_pointsPerSide; //points per side
-    glm::vec2 m_chunkCoords;
-    bool m_preparedToRender;
 
-    // OpenGL variables for 3D rendering
-    GLuint vertexArrayObject;  // Vertex Array Object (VAO) for the chunk, contains vertices and colors VBOs and EBO
-    GLuint vertexBuffer;       // Vertex Buffer Object (VBO) for vertices
-    GLuint colorBuffer;        // Vertex Buffer Object (VBO) for colors 
-    GLuint elementBuffer;      // Element Buffer Object (EBO) for indices
+    private:
 
-    sf::Texture texture2D;     // Texture for the chunk
-    sf::Image image;           // Image for the texture
+        // Specific Attributes
+        double m_chunkSize;             // size of the chunk (in meters)
+        double m_resolution;            // distance between points (in meters)
+        unsigned int m_pointsPerSide;   // N = points per side
+        glm::vec2 m_chunkCoords;        // coordinates of the chunk in the chunk map (in chunks)
+        bool m_preparedToRender;        // flag to check if the chunk is prepared to render
 
-public:
-    //constructors
-    Chunk() {}
-    Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords);
-    //Chunk(size_t sz, glm::vec3 pos) : sz(sz), pos(pos) {}
-    //~Chunk() {}
+        // 3D rendering variables
+        GLuint vertexArrayObject;  // Vertex Array Object (VAO) for the chunk, contains vertices and colors VBOs and EBO
+        GLuint vertexBuffer;       // Vertex Buffer Object (VBO) for vertices
+        GLuint colorBuffer;        // Vertex Buffer Object (VBO) for colors 
+        GLuint elementBuffer;      // Element Buffer Object (EBO) for indices
 
-    //heightmap
-    std::vector<glm::vec3> heightMap;
+        // 2D Rendering variable
+        sf::Texture texture2D;     // Texture for the chunk
+        sf::Image image;           // Image for the texture
 
-    //getters and setters
-    double size() { return m_chunkSize; }
-    double resolution() { return m_resolution; }
-    int pointsPerSide() { return m_pointsPerSide; }
-    glm::vec2 chunkCoords() { return m_chunkCoords; }
-    sf::Texture* getTexture() { return &(this->texture2D); }
-    bool preparedToRender() { return m_preparedToRender; }
+    public:
 
-    // Init buffers
-    void prepareToRender(ColorMap* cmapPointer);
+        // Chunk heightmap
+        std::vector<glm::vec3> heightMap;
+        
+        ////////////////////////// METHODS //////////////////////////////////////
+        
+        // Default constructor
+        Chunk() {}
 
-    // Render the 3D chunk
-    void renderChunk(GLuint* shaderProgram);
+        // Custom constructor
+        Chunk(int64_t seed, double chunkSize, double resolution, glm::vec2 chunkCoords);
 
-    // Destructor
-    ~Chunk();
+        // Init buffers
+        void prepareToRender(ColorMap* cmapPointer);
 
-    //void setHeightMap(T hm) { this->hm = hm; }
-    //void setSize(size_t sz) { this->sz = sz; }
-    //void setPosition(glm::vec3 pos) { this->pos = pos; }
+        // Render the 3D chunk
+        void renderChunk(GLuint* shaderProgram);
+        
+        ////////////////////////// GETTERS AND SETTERS //////////////////////////
+
+        // Get the size of the chunk
+        double size() { return m_chunkSize; }
+
+        // Get the resolution of the chunk
+        double resolution() { return m_resolution; }
+
+        // Get the number of points per side
+        int pointsPerSide() { return m_pointsPerSide; }
+
+        // Get the chunk coordinates
+        glm::vec2 chunkCoords() { return m_chunkCoords; }
+
+        // Get the 2D texture
+        sf::Texture* getTexture() { return &(this->texture2D); }
+
+        // Get the flag preparedToRender
+        bool preparedToRender() { return m_preparedToRender; }
+
+        // Destructor : destroys the buffers
+        ~Chunk();
 };
