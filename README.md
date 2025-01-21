@@ -1,6 +1,7 @@
 # ECE 4122/6122 CUSTOM FINAL PROJECT - Random Height Map Generation and Rendering
 
 **Contributors** : Matthew Luyten, Lydia Jameson, Thomas Ethève
+**Target OS** : Windows
 
 ## Project description
 
